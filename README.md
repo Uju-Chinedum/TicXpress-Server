@@ -1,4 +1,4 @@
-# UpNext API
+# TicXpress API
 
 ## Description
 
