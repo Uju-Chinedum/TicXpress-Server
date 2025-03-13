@@ -1,18 +1,24 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { dbConfig } from 'src/Database/config/db.config';
-import { AuthModule } from '../auth/auth.module';
-import { UsersModule } from '../users/users.module';
+import { dbConfig } from '../../Database/config/db.config';
+import { EventsModule } from '../events/events.module';
 
 @Module({
   imports: [
-    SequelizeModule.forRoot(dbConfig),
-    forwardRef(() => AuthModule),
-    forwardRef(() => UsersModule),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [
+        `src/Config/env/.env.${process.env.NODE_ENV || 'development'}`,
+        '../.env',
+      ],
+    }),
+    SequelizeModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => dbConfig(configService),
+    }),
+    EventsModule
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

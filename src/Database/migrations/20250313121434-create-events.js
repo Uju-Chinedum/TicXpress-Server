@@ -1,5 +1,6 @@
 'use strict';
 
+const { type } = require('os');
 const { v7: uuidv7 } = require('uuidv7');
 
 module.exports = {
@@ -11,7 +12,7 @@ module.exports = {
    */
 
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('users', {
+    await queryInterface.createTable('events', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -19,11 +20,7 @@ module.exports = {
         unique: true,
         defaultValue: uuidv7,
       },
-      firstName: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      lastName: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -32,32 +29,30 @@ module.exports = {
         allowNull: false,
         unique: true,
       },
-      password: {
+      description: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      isEmailVerified: {
-        type: Sequelize.BOOLEAN,
+      location: {
+        type: Sequelize.STRING,
         allowNull: false,
-        defaultValue: false,
       },
-      userType: {
-        type: Sequelize.ENUM('CREATOR', 'ATTENDEE', 'ADMIN'),
+      time: {
+        type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: 'ATTENDEE',
+      },
+      dashboardCode: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       phoneNumber: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      status: {
-        type: Sequelize.ENUM('active', 'restricted'),
+      paid: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
-        defaultValue: 'active',
-      },
-      emailVerificationCode: {
-        type: Sequelize.STRING,
-        allowNull: false,
+        defaultValue: false,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -79,6 +74,6 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
 
-    await queryInterface.dropTable('users');
+    await queryInterface.dropTable('events');
   },
 };
