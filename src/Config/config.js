@@ -6,8 +6,6 @@ require('dotenv').config({
   ),
 });
 
-console.log('Loaded ENV:', process.env.DB_USER); // Debugging line
-
 module.exports = {
   development: {
     username: process.env.DB_USER,
