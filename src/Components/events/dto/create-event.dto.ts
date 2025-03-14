@@ -5,24 +5,37 @@ import {
   IsBoolean,
   IsOptional,
   IsNotEmpty,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateEventDto {
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty({
-    message: 'What is the name of your event?',
-  })
-  name: string;
-
-  @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is your email address?',
   })
   email: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
+    message: 'Who is the organizer of the event?',
+  })
+  organizer: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
+    message: 'What is the name of your event?',
+  })
+  name: string;
 
   @ApiProperty()
   @IsString()
@@ -46,12 +59,12 @@ export class CreateEventDto {
   })
   time: Date;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  phoneNumber?: string;
-
   @ApiProperty()
   @IsBoolean()
   paid: boolean = false;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  amount?: number;
 }

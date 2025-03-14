@@ -1,22 +1,67 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Event } from './entities/event.entity';
-import { Utils } from '../utils';
+import { eventCreationEmail, Utils } from '../utils';
+import { EmailService } from '../utils';
+import { Sequelize } from 'sequelize-typescript';
+import { InternalServerException } from '../../common/exceptions';
 
 @Injectable()
 export class EventsService {
   constructor(
     @InjectModel(Event)
     private eventModel: typeof Event,
+    private emailService: EmailService,
+    private sequelize: Sequelize,
   ) {}
 
-  async create(createEventDto: CreateEventDto) {
-    return await this.eventModel.create({
-      ...createEventDto,
-      dashboardCode: Utils.generateDashboardCode(),
-    });
+  async create(eventBody: CreateEventDto) {
+    const transaction = await this.sequelize.transaction();
+
+    try {
+      const { name, email, paid } = eventBody;
+      const dashboardCode = Utils.generateDashboardCode();
+
+      const event = await this.eventModel.create(
+        {
+          ...eventBody,
+          dashboardCode,
+        },
+        { transaction },
+      );
+
+      const emailResponse = await this.emailService.sendEmail(
+        email,
+        `${name} created successfully`,
+        eventCreationEmail(event),
+      );
+
+      if (!emailResponse.success) {
+        await transaction.rollback();
+        throw new InternalServerException(
+          'Email Error',
+          'Error while sending email',
+        );;
+      }
+
+      await transaction.commit();
+
+      return {
+        success: true,
+        statusCode: HttpStatus.CREATED,
+        message:
+          'Event created successfully. Please check your mail for details.',
+        data: event,
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw new InternalServerException(
+        'Event Creation Error',
+        'Error while creating event',
+      );;
+    }
   }
 
   async findAll() {

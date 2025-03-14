@@ -24,16 +24,24 @@ export class Event extends Model {
   @AllowNull(false)
   @Default(uuidv7())
   @Column(DataType.UUID)
-  declare public id: string;
-
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  public name: string;
+  declare id: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
   public email: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public phoneNumber: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public organizer: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public name: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -47,27 +55,27 @@ export class Event extends Model {
   @Column(DataType.DATE)
   public time: Date;
 
-  @Unique
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  public dashboardCode: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  public phoneNumber: string;
-
   @AllowNull(false)
   @Default(false)
   @Column(DataType.BOOLEAN)
   public paid: boolean;
 
+  @AllowNull(true)
+  @Column(DataType.NUMBER)
+  public amount: number;
+
+  @Unique
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public dashboardCode: string;
+
   @AllowNull(false)
   @CreatedAt
   @Column(DataType.DATE)
-  declare public createdAt: Date;
+  declare createdAt: Date;
 
   @AllowNull(true)
   @UpdatedAt
   @Column(DataType.DATE)
-  declare public updatedAt: Date;
+  declare updatedAt: Date;
 }

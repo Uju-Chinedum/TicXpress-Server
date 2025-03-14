@@ -20,14 +20,22 @@ module.exports = {
         unique: true,
         defaultValue: uuidv7,
       },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       email: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
+      },
+      phoneNumber: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      organizer: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       description: {
         type: Sequelize.STRING,
@@ -41,18 +49,18 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      dashboardCode: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      phoneNumber: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
       paid: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      amount: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
+      dashboardCode: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         type: Sequelize.DATE,
