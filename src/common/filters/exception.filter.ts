@@ -13,16 +13,20 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from 'sequelize';
+import { GlobalService } from 'src/Components/global/global.service';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: any, host: ArgumentsHost) {
+  constructor(private readonly globalService: GlobalService) {}
+
+  async catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let name = 'Internal Server Error';
     let message = 'Something went wrong!! Please try again.';
+    let stack = exception.stack.toString();
 
     if (exception instanceof NotFoundException) {
       status = HttpStatus.NOT_FOUND;
@@ -61,15 +65,18 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = `Invalid foreign key: ${exception.message}`;
     }
 
+    let match = /at (\w+\.\w+) /;
+    const context = stack.match(match);
+    await this.globalService.logError('error', message, stack, context[1]);
+
     response.status(status).json({
       success: false,
       statusCode: status,
       data: {
         name,
         message,
-        error: { name: exception.name, stack: exception.stack },
+        timestamp: new Date().toISOString(),
       },
-      timestamp: new Date().toISOString(),
     });
   }
 }

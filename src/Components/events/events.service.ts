@@ -7,6 +7,7 @@ import { eventCreationEmail, Utils } from '../utils';
 import { EmailService } from '../utils';
 import { Sequelize } from 'sequelize-typescript';
 import { InternalServerException } from '../../common/exceptions';
+import { UniqueConstraintError } from 'sequelize';
 
 @Injectable()
 export class EventsService {
@@ -43,7 +44,7 @@ export class EventsService {
         throw new InternalServerException(
           'Email Error',
           'Error while sending email',
-        );;
+        );
       }
 
       await transaction.commit();
@@ -57,10 +58,7 @@ export class EventsService {
       };
     } catch (error) {
       await transaction.rollback();
-      throw new InternalServerException(
-        'Event Creation Error',
-        'Error while creating event',
-      );;
+      throw error;
     }
   }
 

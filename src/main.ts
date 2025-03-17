@@ -4,13 +4,15 @@ import { NotFoundException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/filters/';
 import { ConfigService } from '@nestjs/config';
+import { GlobalService } from './Components/global/global.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const globalService = app.get(GlobalService)
 
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter(globalService));
 
   app.enableCors({
     origin: configService.get<string>('ALLOWED_ORIGINS')?.split(',') ?? '*',
