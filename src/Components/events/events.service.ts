@@ -102,7 +102,7 @@ export class EventsService {
 
       return {
         success: true,
-        statusCode: HttpStatus.CREATED,
+        statusCode: HttpStatus.OK,
         message: 'Gotten all events successfully',
         data: Utils.paginateResponse([events.rows, events.count], page, limit),
       };
@@ -111,8 +111,22 @@ export class EventsService {
     }
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} event`;
+  async findOne(id: string) {
+    try {
+      const event = await this.eventModel.findOne({
+        where: { id },
+        attributes: this.eventAttributes,
+      });
+
+      return {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Gotten event successfully',
+        data: { ...event?.dataValues },
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async update(id: number, updateEventDto: UpdateEventDto) {
