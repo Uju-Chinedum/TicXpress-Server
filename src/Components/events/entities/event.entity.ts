@@ -70,6 +70,11 @@ export class Event extends Model {
   public dashboardCode: string;
 
   @AllowNull(false)
+  @Default(true)
+  @Column(DataType.BOOLEAN)
+  public active: boolean;
+
+  @AllowNull(false)
   @Default(0)
   @Column(DataType.NUMBER)
   public count: number;

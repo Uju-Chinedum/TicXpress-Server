@@ -190,11 +190,11 @@ export class EventsService {
     }
   }
 
-  async update(id: number, updateEventDto: UpdateEventDto) {
+  async update(id: string, updateEventDto: UpdateEventDto) {
     return `This action updates a #${id} event`;
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return `This action removes a #${id} event`;
   }
 }
