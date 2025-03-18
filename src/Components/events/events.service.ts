@@ -12,7 +12,6 @@ import {
   NotFoundException,
 } from '../../common/exceptions';
 import { PaginationDto } from '../global/dto';
-import { truncateSync } from 'fs';
 
 @Injectable()
 export class EventsService {
@@ -216,7 +215,23 @@ export class EventsService {
     }
   }
 
-  async remove(id: string) {
-    return `This action removes a #${id} event`;
+  async remove(dashboardCode: string) {
+    try {
+      const event = await this.eventModel.destroy({ where: { dashboardCode } });
+      if (event === 0)
+        throw new NotFoundException(
+          'Event Not Found',
+          `No event found with dashboard code matching ${dashboardCode}`,
+        );
+
+      return {
+        success: true,
+        statusCode: 200,
+        message: 'Deleted event successfully',
+        data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }
