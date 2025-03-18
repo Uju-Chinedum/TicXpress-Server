@@ -47,7 +47,7 @@ export class Transaction extends Model {
   @Column(DataType.UUID)
   eventId: string;
 
-  @AllowNull(true)
+  @AllowNull(false)
   @Column(DataType.DECIMAL(20, 8))
   public amount: number;
 
@@ -59,6 +59,18 @@ export class Transaction extends Model {
   @AllowNull(false)
   @Column(DataType.ENUM(...Object.values(TransactionType)))
   public type: TransactionType;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  transactionReference: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  paymentLink: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  transactionStatus: string;
 
   @AllowNull(false)
   @CreatedAt
