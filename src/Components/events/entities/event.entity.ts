@@ -26,7 +26,6 @@ export class Event extends Model {
   @Column(DataType.UUID)
   declare id: string;
 
-  @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
   public email: string;
@@ -39,6 +38,7 @@ export class Event extends Model {
   @Column(DataType.STRING)
   public organizer: string;
 
+  @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
   public name: string;
@@ -68,6 +68,16 @@ export class Event extends Model {
   @AllowNull(false)
   @Column(DataType.STRING)
   public dashboardCode: string;
+
+  @AllowNull(false)
+  @Default(0)
+  @Column(DataType.NUMBER)
+  public count: number;
+
+  @AllowNull(false)
+  @Default(0)
+  @Column(DataType.NUMBER)
+  public totalAmount: number;
 
   @AllowNull(false)
   @CreatedAt

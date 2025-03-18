@@ -22,7 +22,7 @@ export class EventsService {
     const transaction = await this.sequelize.transaction();
 
     try {
-      const { name, email, paid } = eventBody;
+      const { name, email } = eventBody;
       const dashboardCode = Utils.generateDashboardCode();
 
       const event = await this.eventModel.create(
@@ -49,12 +49,25 @@ export class EventsService {
 
       await transaction.commit();
 
+      const fullEvent = event.get({ plain: true });
       return {
         success: true,
         statusCode: HttpStatus.CREATED,
         message:
           'Event created successfully. Please check your mail for details.',
-        data: event,
+        data: {
+          id: fullEvent.id,
+          email: fullEvent.email,
+          phoneNumber: fullEvent.phoneNumber,
+          organizer: fullEvent.organizer,
+          name: fullEvent.name,
+          description: fullEvent.description,
+          location: fullEvent.location,
+          time: fullEvent.time,
+          paid: fullEvent.paid,
+          amount: fullEvent.amount,
+          createdAt: fullEvent.createdAt,
+        },
       };
     } catch (error) {
       await transaction.rollback();
