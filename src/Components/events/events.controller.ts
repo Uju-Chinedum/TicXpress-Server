@@ -32,18 +32,18 @@ export class EventsController {
     return this.eventsService.getDetails(code);
   }
 
+  @Patch('organizer/:code')
+  update(@Param('code') code: string, @Body() updateEventDto: UpdateEventDto) {
+    return this.eventsService.update(code, updateEventDto);
+  }
+
+  @Delete('organizer/:code')
+  remove(@Param('code') code: string) {
+    return this.eventsService.remove(code);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.eventsService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(id, updateEventDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.eventsService.remove(id);
   }
 }

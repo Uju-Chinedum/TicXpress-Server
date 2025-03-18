@@ -12,6 +12,7 @@ import {
   NotFoundException,
 } from '../../common/exceptions';
 import { PaginationDto } from '../global/dto';
+import { truncateSync } from 'fs';
 
 @Injectable()
 export class EventsService {
@@ -45,6 +46,7 @@ export class EventsService {
     'time',
     'paid',
     'amount',
+    'active',
     'count',
     'totalAmount',
     'updatedAt',
@@ -120,6 +122,7 @@ export class EventsService {
       const skip = Utils.calcSkip(page, limit);
 
       const events = await this.eventModel.findAndCountAll({
+        where: { active: true },
         attributes: this.attendeeAttributes,
         offset: skip,
         limit,
@@ -140,20 +143,20 @@ export class EventsService {
   async findOne(id: string) {
     try {
       const event = await this.eventModel.findOne({
-        where: { id },
+        where: { id, active: true },
         attributes: this.attendeeAttributes,
       });
       if (!event)
         throw new NotFoundException(
           'Event Not Found',
-          `No event found with id: ${id}`,
+          `No event found with id: ${id} or the event is no longer active`,
         );
 
       return {
         success: true,
         statusCode: HttpStatus.OK,
         message: 'Gotten event successfully',
-        data: { ...event.dataValues },
+        data: event,
       };
     } catch (error) {
       throw error;
@@ -172,26 +175,45 @@ export class EventsService {
         where: { dashboardCode },
         attributes: this.organizerAttributes,
       });
-      if (!event) {
+      if (!event)
         throw new NotFoundException(
           'Event Not Found',
           `No event found with dashboard code matching ${dashboardCode}`,
         );
-      }
 
       return {
         success: true,
         statusCode: HttpStatus.OK,
         message: 'Gotten event successfully',
-        data: { ...event.dataValues },
+        data: event,
       };
     } catch (error) {
       throw error;
     }
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event`;
+  async update(dashboardCode: string, updateEventDto: UpdateEventDto) {
+    try {
+      const [count, event] = await this.eventModel.update(
+        { ...updateEventDto },
+        { where: { dashboardCode }, returning: true },
+      );
+
+      if (count === 0)
+        throw new NotFoundException(
+          'Event Not Found',
+          `No event found with dashboard code matching ${dashboardCode}`,
+        );
+
+      return {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Updated event successfully',
+        data: event[0],
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async remove(id: string) {
