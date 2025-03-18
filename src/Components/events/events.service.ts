@@ -7,7 +7,7 @@ import { eventCreationEmail, Utils } from '../utils';
 import { EmailService } from '../utils';
 import { Sequelize } from 'sequelize-typescript';
 import { InternalServerException } from '../../common/exceptions';
-import { UniqueConstraintError } from 'sequelize';
+import { PaginationDto } from '../global/dto';
 
 @Injectable()
 export class EventsService {
@@ -17,6 +17,18 @@ export class EventsService {
     private emailService: EmailService,
     private sequelize: Sequelize,
   ) {}
+
+  private readonly eventAttributes: string[] = [
+    'id',
+    'organizer',
+    'name',
+    'description',
+    'location',
+    'time',
+    'paid',
+    'amount',
+    'createdAt',
+  ];
 
   async create(eventBody: CreateEventDto) {
     const transaction = await this.sequelize.transaction();
@@ -75,8 +87,28 @@ export class EventsService {
     }
   }
 
-  async findAll() {
-    return `This action returns all events`;
+  async findAll(dto: PaginationDto) {
+    try {
+      const page = dto.page ?? 1;
+      const limit = dto.limit ?? 10;
+      const skip = Utils.calcSkip(page, limit);
+
+      const events = await this.eventModel.findAndCountAll({
+        attributes: this.eventAttributes,
+        offset: skip,
+        limit,
+        order: [['createdAt', 'DESC']],
+      });
+
+      return {
+        success: true,
+        statusCode: HttpStatus.CREATED,
+        message: 'Gotten all events successfully',
+        data: Utils.paginateResponse([events.rows, events.count], page, limit),
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findOne(id: number) {

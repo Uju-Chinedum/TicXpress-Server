@@ -16,7 +16,7 @@ export class Utils {
     const prevPage = page - 1 < 1 ? null : page - 1;
 
     return {
-      data: [...result],
+      results: [...result],
       pageData: {
         total,
         currentPage: +page,
