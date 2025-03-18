@@ -6,7 +6,11 @@ import { Event } from './entities/event.entity';
 import { eventCreationEmail, Utils } from '../utils';
 import { EmailService } from '../utils';
 import { Sequelize } from 'sequelize-typescript';
-import { InternalServerException } from '../../common/exceptions';
+import {
+  BadRequestException,
+  InternalServerException,
+  NotFoundException,
+} from '../../common/exceptions';
 import { PaginationDto } from '../global/dto';
 
 @Injectable()
@@ -18,7 +22,7 @@ export class EventsService {
     private sequelize: Sequelize,
   ) {}
 
-  private readonly eventAttributes: string[] = [
+  private readonly attendeeAttributes: string[] = [
     'id',
     'organizer',
     'name',
@@ -27,10 +31,32 @@ export class EventsService {
     'time',
     'paid',
     'amount',
-    'createdAt',
+    'updatedAt',
+  ];
+
+  private readonly organizerAttributes: string[] = [
+    'id',
+    'email',
+    'phoneNumber',
+    'organizer',
+    'name',
+    'description',
+    'location',
+    'time',
+    'paid',
+    'amount',
+    'count',
+    'totalAmount',
+    'updatedAt',
   ];
 
   async create(eventBody: CreateEventDto) {
+    if (!eventBody)
+      throw new BadRequestException(
+        'Missing Details',
+        'Please provide all details for your event.',
+      );
+
     const transaction = await this.sequelize.transaction();
 
     try {
@@ -94,10 +120,10 @@ export class EventsService {
       const skip = Utils.calcSkip(page, limit);
 
       const events = await this.eventModel.findAndCountAll({
-        attributes: this.eventAttributes,
+        attributes: this.attendeeAttributes,
         offset: skip,
         limit,
-        order: [['createdAt', 'DESC']],
+        order: [['updatedAt', 'DESC']],
       });
 
       return {
@@ -115,14 +141,49 @@ export class EventsService {
     try {
       const event = await this.eventModel.findOne({
         where: { id },
-        attributes: this.eventAttributes,
+        attributes: this.attendeeAttributes,
       });
+      if (!event)
+        throw new NotFoundException(
+          'Event Not Found',
+          `No event found with id: ${id}`,
+        );
 
       return {
         success: true,
         statusCode: HttpStatus.OK,
         message: 'Gotten event successfully',
-        data: { ...event?.dataValues },
+        data: { ...event.dataValues },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getDetails(dashboardCode: string) {
+    if (!dashboardCode)
+      throw new BadRequestException(
+        'Missing Details',
+        'Please provide your dashboad code',
+      );
+
+    try {
+      const event = await this.eventModel.findOne({
+        where: { dashboardCode },
+        attributes: this.organizerAttributes,
+      });
+      if (!event) {
+        throw new NotFoundException(
+          'Event Not Found',
+          `No event found with dashboard code matching ${dashboardCode}`,
+        );
+      }
+
+      return {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Gotten event successfully',
+        data: { ...event.dataValues },
       };
     } catch (error) {
       throw error;
