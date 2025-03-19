@@ -4,6 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { dbConfig } from '../../Database/config/db.config';
 import { EventsModule } from '../events/events.module';
 import { GlobalModule } from '../global/global.module';
+import { TransactionsModule } from '../transactions/transactions.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { GlobalModule } from '../global/global.module';
       useFactory: (configService: ConfigService) => dbConfig(configService),
     }),
     EventsModule,
-    GlobalModule
+    GlobalModule,
+    TransactionsModule,
   ],
 })
 export class AppModule {}
