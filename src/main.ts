@@ -3,8 +3,10 @@ import { AppModule } from './Components/app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/filters/';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GlobalService } from './Components/global/global.service';
+
+ConfigModule.forRoot();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

@@ -8,7 +8,6 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 
 export class CreateTransactionDto {
   @ApiProperty()
@@ -47,6 +46,13 @@ export class CreateTransactionDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
+    message: 'What is the transaction reference?',
+  })
+  transactionReference: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
     message: 'What is your payment type?',
   })
   type: 'Card' | 'Crypto';
@@ -54,7 +60,7 @@ export class CreateTransactionDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  transactionReference?: string;
+  gatewayReference?: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -64,5 +70,5 @@ export class CreateTransactionDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  transactionStatus?: string;
+  gatewayStatus?: string;
 }

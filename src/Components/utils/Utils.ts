@@ -1,4 +1,5 @@
 import * as randomstring from 'randomstring';
+import { uuidv7 } from 'uuidv7';
 
 export class Utils {
   static generateDashboardCode(): string {
@@ -29,5 +30,18 @@ export class Utils {
 
   static calcSkip(page: number, limit: number) {
     return (page - 1) * limit;
+  }
+
+  static generateTrxReference(): string {
+    const timestamp = Date.now().toString().slice(-6);
+    const uuidPart = uuidv7().replace(/-/g, '').slice(-12);
+    const randomPart = randomstring.generate({
+      length: 8,
+      charset: 'alphanumeric',
+      capitalization: 'uppercase',
+    });
+
+    const reference = `TicX-${uuidPart}${randomPart}${timestamp}`.slice(0, 32);
+    return reference;
   }
 }

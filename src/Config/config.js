@@ -1,56 +1,49 @@
 const { ConfigModule, ConfigService } = require('@nestjs/config');
 
-ConfigModule.forRoot({
-  envFilePath: [
-    `src/Config/env/.env.${process.env.NODE_ENV || 'development'}`,
-    'src/.env',
-  ],
-  isGlobal: true,
-});
-
+ConfigModule.forRoot();
 const configService = new ConfigService();
 
 module.exports = {
   development: {
-    username: configService.get('DB_USER'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
-    host: configService.get('DB_HOST'),
-    port: configService.get('DB_PORT'),
+    username: configService.get('DEV_DB_USER'),
+    password: configService.get('DEV_DB_PASSWORD'),
+    database: configService.get('DEV_DB_NAME'),
+    host: configService.get('DEV_DB_HOST'),
+    port: configService.get('DEV_DB_PORT'),
     dialect: 'postgres',
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl:
+        configService.get('DB_SSL') === true
+          ? { require: true, rejectUnauthorized: false }
+          : false,
     },
   },
   test: {
-    username: configService.get('DB_USER'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
-    host: configService.get('DB_HOST'),
-    port: configService.get('DB_PORT'),
+    username: configService.get('TEST_DB_USER'),
+    password: configService.get('TEST_DB_PASSWORD'),
+    database: configService.get('TEST_DB_NAME'),
+    host: configService.get('TEST_DB_HOST'),
+    port: configService.get('TEST_DB_PORT'),
     dialect: 'postgres',
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl:
+        configService.get('DB_SSL') === true
+          ? { require: true, rejectUnauthorized: false }
+          : false,
     },
   },
   production: {
-    username: configService.get('DB_USER'),
-    password: configService.get('DB_PASSWORD'),
-    database: configService.get('DB_NAME'),
-    host: configService.get('DB_HOST'),
-    port: configService.get('DB_PORT'),
+    username: configService.get('PROD_DB_USER'),
+    password: configService.get('PROD_DB_PASSWORD'),
+    database: configService.get('PROD_DB_NAME'),
+    host: configService.get('PROD_DB_HOST'),
+    port: configService.get('PROD_DB_PORT'),
     dialect: 'postgres',
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl:
+        configService.get('DB_SSL') === true
+          ? { require: true, rejectUnauthorized: false }
+          : false,
     },
   },
 };

@@ -45,6 +45,10 @@ module.exports = {
         type: Sequelize.DECIMAL(20, 8),
         allowNull: false,
       },
+      transactionReference: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       status: {
         type: Sequelize.ENUM(['Pending', 'Failed', 'Successful']),
         allowNull: false,
@@ -54,7 +58,7 @@ module.exports = {
         type: Sequelize.ENUM(['Card', 'Crypto']),
         allowNull: false,
       },
-      transactionReference: {
+      gatewayReference: {
         type: Sequelize.STRING,
         allowNull: true,
       },
@@ -62,7 +66,7 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      transactionStatus: {
+      gatewayStatus: {
         type: Sequelize.STRING,
         allowNull: true,
       },

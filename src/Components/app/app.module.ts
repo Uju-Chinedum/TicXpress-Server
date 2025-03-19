@@ -10,10 +10,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [
-        `src/Config/env/.env.${process.env.NODE_ENV || 'development'}`,
-        '../.env',
-      ],
+      envFilePath: ['../.env'],
     }),
     SequelizeModule.forRootAsync({
       imports: [ConfigModule],

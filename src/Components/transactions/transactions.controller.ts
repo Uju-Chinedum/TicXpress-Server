@@ -9,9 +9,9 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import {
   InitializeTransactionDto,
@@ -20,7 +20,6 @@ import {
 } from './dto/paystack.dto';
 import { BadRequestException } from '../../common/exceptions';
 import { PAYSTACK_WEBHOOK_SIGNATURE_KEY } from '../global/constants';
-import { IncomingHttpHeaders } from 'http';
 
 @Controller('api/v1/transactions')
 export class TransactionsController {
@@ -40,7 +39,7 @@ export class TransactionsController {
   @HttpCode(HttpStatus.OK)
   async paymentWebhookHandler(
     @Body() dto: PaystackWebhookDto,
-    @Headers() headers: IncomingHttpHeaders,
+    @Headers() headers = {},
   ) {
     const result = await this.transactionsService.handlePaystackWebhook(
       dto,

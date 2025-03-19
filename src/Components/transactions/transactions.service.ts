@@ -13,7 +13,10 @@ import {
   PaystackWebhookDto,
 } from './dto/paystack.dto';
 import { Event } from '../events/entities/event.entity';
-import { NotFoundException } from '../../common/exceptions';
+import {
+  BadRequestException,
+  NotFoundException,
+} from '../../common/exceptions';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosResponse } from 'axios';
 import {
@@ -22,7 +25,9 @@ import {
   PAYSTACK_WEBHOOK_CRYPTO_ALGO,
 } from '../global/constants';
 import { TransactionStatus } from './types';
-import { createHmac, KeyObject, timingSafeEqual } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
+import { uuidv7 } from 'uuidv7';
+import { Utils } from '../utils';
 
 @Injectable()
 export class TransactionsService {
@@ -94,13 +99,14 @@ export class TransactionsService {
         phoneNumber,
         eventId,
         amount,
+        transactionReference: Utils.generateTrxReference(),
         type: 'Card',
-        transactionReference: data.reference,
+        gatewayReference: data.reference,
         paymentLink: data.authorization_url,
       };
 
       if (result.status === true) {
-        await this.trxModel.create({ ...transaction });
+        await this.trxModel.create({ id: uuidv7(), ...transaction });
       }
 
       return {
@@ -116,7 +122,7 @@ export class TransactionsService {
 
   async verifyTransaction(dto: PaystackCallbackDto) {
     const transaction = await this.trxModel.findOne({
-      where: { transactionReference: dto.reference },
+      where: { gatewayReference: dto.reference },
     });
     if (!transaction)
       throw new NotFoundException(
@@ -124,7 +130,7 @@ export class TransactionsService {
         `No transaction found with reference: ${dto.reference}`,
       );
 
-    const url = `${PAYSTACK_VERIFY_BASE_URL}/${transaction.transactionReference}`;
+    const url = `${PAYSTACK_VERIFY_BASE_URL}/${transaction.dataValues.gatewayReference}`;
     let response: AxiosResponse<PaystackVerifyTransactionResponseDto>;
 
     try {
@@ -136,23 +142,38 @@ export class TransactionsService {
       if (!response) return null;
 
       const result = response.data;
-      const transactionStatus = result?.data?.status;
+      const gatewayStatus = result?.data?.status;
 
-      const paymentConfirmed = transactionStatus === 'success';
+      const paymentConfirmed = gatewayStatus === 'success';
+
+      let updatedTrx: any;
       if (paymentConfirmed) {
-        transaction.status = TransactionStatus.SUCCESS;
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.SUCCESS,
+            gatewayStatus,
+            paymentLink: null,
+          },
+          { where: { gatewayReference: dto.reference }, returning: true },
+        );
+        updatedTrx = trx;
       } else {
-        transaction.status = TransactionStatus.FAILED;
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.FAILED,
+            gatewayStatus,
+            paymentLink: null,
+          },
+          { where: { gatewayReference: dto.reference }, returning: true },
+        );
+        updatedTrx = trx;
       }
-
-      transaction.transactionStatus = transactionStatus;
-      await transaction.save();
 
       return {
         success: true,
         statusCode: HttpStatus.OK,
         message: 'Transaction Verified',
-        data: transaction,
+        data: updatedTrx,
       };
     } catch (error) {
       throw error;
@@ -165,13 +186,19 @@ export class TransactionsService {
     let isValidEvent: string | boolean = false;
 
     try {
-      const hash = createHmac(
-        PAYSTACK_WEBHOOK_CRYPTO_ALGO,
-        this.configService.get('PAYSTACK_SECRET_KEY') as KeyObject,
-      )
+      const secretKey = this.configService.get<string>('PAYSTACK_SECRET_KEY');
+      if (!secretKey) {
+        throw new BadRequestException(
+          'Missing Secret Key',
+          'PAYSTACK_SECRET_KEY is not defined in environment variables',
+        );
+      }
+
+      const hash = createHmac(PAYSTACK_WEBHOOK_CRYPTO_ALGO, secretKey)
         .update(JSON.stringify(dto))
         .digest('hex');
 
+      if (!signature || signature.length !== hash.length) return false;
       isValidEvent =
         hash &&
         signature &&
@@ -183,7 +210,7 @@ export class TransactionsService {
 
       const transaction = await this.trxModel.findOne({
         where: {
-          transactionReference: dto.data.reference,
+          gatewayReference: dto.data.reference,
         },
       });
       if (!transaction)
@@ -192,23 +219,43 @@ export class TransactionsService {
           `No transaction found with reference: ${dto.data.reference}`,
         );
 
-      const transactionStatus = dto.data.status;
-      const paymentConfirmed = transactionStatus === 'success';
+      const gatewayStatus = dto.data.status;
+      const paymentConfirmed = gatewayStatus === 'success';
 
+      let updatedTrx: any;
       if (paymentConfirmed) {
-        transaction.status = TransactionStatus.SUCCESS;
-        transaction.transactionStatus = transactionStatus;
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.SUCCESS,
+            gatewayStatus,
+            paymentLink: null,
+          },
+          {
+            where: { gatewayReference: dto.data.reference },
+            returning: true,
+          },
+        );
+        updatedTrx = trx;
       } else {
-        transaction.status = TransactionStatus.FAILED;
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.FAILED,
+            gatewayStatus,
+            paymentLink: null,
+          },
+          {
+            where: { gatewayReference: dto.data.reference },
+            returning: true,
+          },
+        );
+        updatedTrx = trx;
       }
-
-      await transaction.save();
 
       return {
         success: true,
         statusCode: HttpStatus.OK,
-        message: 'Transaction verified',
-        data: transaction,
+        message: 'Transaction Verified',
+        data: updatedTrx,
       };
     } catch (error) {
       throw error;

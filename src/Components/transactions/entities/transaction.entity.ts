@@ -26,7 +26,6 @@ export class Transaction extends Model {
   @PrimaryKey
   @Unique
   @AllowNull(false)
-  @Default(uuidv7())
   @Column(DataType.UUID)
   declare id: string;
 
@@ -52,6 +51,10 @@ export class Transaction extends Model {
   public amount: number;
 
   @AllowNull(false)
+  @Column(DataType.STRING)
+  public transactionReference: string;
+
+  @AllowNull(false)
   @Default(TransactionStatus.PENDING)
   @Column(DataType.ENUM(...Object.values(TransactionStatus)))
   public status: TransactionStatus;
@@ -62,15 +65,15 @@ export class Transaction extends Model {
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  transactionReference: string;
+  public gatewayReference: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  paymentLink: string;
+  public paymentLink: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  transactionStatus: string;
+  public gatewayStatus: string;
 
   @AllowNull(false)
   @CreatedAt

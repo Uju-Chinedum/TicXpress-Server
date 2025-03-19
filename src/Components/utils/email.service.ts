@@ -7,6 +7,10 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    this.initializeTransporter()
+  }
+
+  private async initializeTransporter() {
     const OAuth2 = google.auth.OAuth2;
     const oauth2Client = new OAuth2(
       process.env.OAUTH_CLIENTID,
@@ -17,7 +21,7 @@ export class EmailService {
     oauth2Client.setCredentials({
       refresh_token: process.env.OAUTH_REFRESH_TOKEN,
     });
-    const accessToken = oauth2Client.getAccessToken();
+    const accessToken = await oauth2Client.getAccessToken();
 
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
