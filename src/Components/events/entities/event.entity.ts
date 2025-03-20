@@ -10,7 +10,6 @@ import {
   UpdatedAt,
   Default,
 } from 'sequelize-typescript';
-import { uuidv7 } from 'uuidv7';
 
 @Table({
   tableName: 'events',
@@ -22,7 +21,6 @@ export class Event extends Model {
   @PrimaryKey
   @Unique
   @AllowNull(false)
-  @Default(uuidv7())
   @Column(DataType.UUID)
   declare id: string;
 
@@ -63,6 +61,14 @@ export class Event extends Model {
   @AllowNull(true)
   @Column(DataType.NUMBER)
   public amount: number;
+
+  @AllowNull(true)
+  @Column(DataType.DECIMAL(20, 8))
+  public cryptoAmount: number;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public currency: string;
 
   @Unique
   @AllowNull(false)

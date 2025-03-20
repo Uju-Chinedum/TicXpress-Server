@@ -6,6 +6,7 @@ import {
   HttpStatus,
   NotFoundException,
 } from '@nestjs/common';
+import axios from 'axios';
 import { Response } from 'express';
 import {
   DatabaseError,
@@ -65,9 +66,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       message = `Invalid foreign key: ${exception.message}`;
     }
 
+    if (axios.isAxiosError(exception) && exception.response) {
+      console.log(exception)
+      // status = HttpStatus.BAD_REQUEST;
+      // name = 'API Error';
+      // message = exception.response.data.errors[0];
+    }
+
     let match = /at (\w+\.\w+) /;
     const context = stack.match(match);
-    await this.globalService.logError('error', message, stack, context[1]);
+    await this.globalService.logError({
+      level: 'error',
+      name,
+      message,
+      stack,
+      context: context[1],
+    });
+
+    console.log("Exception:", exception)
 
     response.status(status).json({
       success: false,

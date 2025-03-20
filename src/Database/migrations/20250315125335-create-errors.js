@@ -23,6 +23,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       message: {
         type: Sequelize.TEXT,
         allowNull: false,

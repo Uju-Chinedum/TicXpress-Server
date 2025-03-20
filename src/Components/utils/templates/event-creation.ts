@@ -9,11 +9,14 @@ export const eventCreationEmail = (event: Event) => {
     description,
     paid,
     amount,
+    currency,
+    cryptoAmount,
     dashboardCode,
   } = event.dataValues;
 
   const amountSection = paid
-    ? `<p><strong>💰 Amount:</strong> $${amount?.toFixed(2)}</p>`
+    ? `<p><strong>💰 Amount:</strong> NGN${amount?.toFixed(2)}</p>
+    <p><strong>💰 Crypto Amount:</strong> ${cryptoAmount} ${currency}</p>`
     : '<p><strong>🎟 FREE ENTRY</strong></p>';
 
   const styles = `

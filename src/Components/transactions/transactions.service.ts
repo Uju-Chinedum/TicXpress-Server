@@ -1,10 +1,12 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
+import {
+  CreateTransactionDto,
+  InitializeTransactionDto,
+} from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import {
-  InitializeTransactionDto,
   PaystackCallbackDto,
   PaystackCreateTransactionDto,
   PaystackCreateTransactionResponseDto,
@@ -20,6 +22,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosResponse } from 'axios';
 import {
+  COINGATE_INIT_URL,
   PAYSTACK_INIT_URL,
   PAYSTACK_VERIFY_BASE_URL,
   PAYSTACK_WEBHOOK_CRYPTO_ALGO,
@@ -28,6 +31,10 @@ import { TransactionStatus } from './types';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { uuidv7 } from 'uuidv7';
 import { Utils } from '../utils';
+import {
+  CoingateInitTransactionDto,
+  CoingateInitTransactionResponseDto,
+} from './dto/coingate.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -40,7 +47,7 @@ export class TransactionsService {
   ) {}
 
   async initializePaystackTransaction(dto: InitializeTransactionDto) {
-    const { eventId, fullName, email, amount, phoneNumber } = dto;
+    const { eventId, fullName, email, phoneNumber } = dto;
 
     const event = await this.eventModel.findOne({ where: { id: eventId } });
     if (!event)
@@ -67,7 +74,7 @@ export class TransactionsService {
 
     const paystackTransaction: PaystackCreateTransactionDto = {
       email,
-      amount: amount * 100,
+      amount: event.dataValues.amount * 100,
       metadata,
     };
 
@@ -98,7 +105,7 @@ export class TransactionsService {
         email,
         phoneNumber,
         eventId,
-        amount,
+        amount: event.dataValues.amount,
         transactionReference: Utils.generateTrxReference(),
         type: 'Card',
         gatewayReference: data.reference,
@@ -120,7 +127,7 @@ export class TransactionsService {
     }
   }
 
-  async verifyTransaction(dto: PaystackCallbackDto) {
+  async verifyPaystackTransaction(dto: PaystackCallbackDto) {
     const transaction = await this.trxModel.findOne({
       where: { gatewayReference: dto.reference },
     });
@@ -259,6 +266,115 @@ export class TransactionsService {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  async initializeCoingateTransaction(dto: InitializeTransactionDto) {
+    const { eventId, fullName, email, phoneNumber } = dto;
+    const event = await this.eventModel.findOne({ where: { id: eventId } });
+    if (!event)
+      throw new NotFoundException(
+        'Event Not Found',
+        `No event found with id: ${eventId}`,
+      );
+
+    const trxRef = Utils.generateTrxReference();
+    const coingateTransaction: CoingateInitTransactionDto = {
+      order_id: trxRef,
+      price_amount: event.dataValues.cryptoAmount,
+      price_currency: event.dataValues.currency,
+      receive_currency: event.dataValues.currency,
+      title: event.dataValues.name,
+      description: event.dataValues.description,
+      callback_url: this.configService.get<string>('COINGATE_CALLBACK_URL')!,
+      cancel_url: this.configService.get<string>('COINGATE_CANCEL_URL')!,
+      success_url: this.configService.get<string>('COINGATE_SUCCESS_URL')!,
+      token: trxRef.slice(5),
+    };
+
+    try {
+      const response = await axios.post<CoingateInitTransactionResponseDto>(
+        COINGATE_INIT_URL,
+        coingateTransaction,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Token ${this.configService.get<string>('COINGATE_AUTH_TOKEN')}`,
+          },
+        },
+      );
+
+      const transaction: CreateTransactionDto = {
+        fullName,
+        email,
+        phoneNumber,
+        eventId,
+        amount: event.dataValues.cryptoAmount,
+        transactionReference: trxRef,
+        type: 'Crypto',
+        gatewayReference: String(response.data.id),
+        paymentLink: response.data.payment_url,
+      };
+
+      await this.trxModel.create({ id: uuidv7(), ...transaction });
+
+      return {
+        success: true,
+        statusCode: HttpStatus.CREATED,
+        message: 'Transaction in progress',
+        data: transaction,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async verifyCoingateTransaction(body) {
+    const { status, order_id } = body;
+    console.log(body)
+
+    try {
+      const transaction = await this.trxModel.findOne({
+        where: { transactionReference: order_id },
+      });
+      if (!transaction)
+        throw new NotFoundException(
+          'Transaction Not Found',
+          `No transaction found with reference: ${order_id}`,
+        );
+
+      let updatedTrx: any;
+      if (status === 'paid') {
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.SUCCESS,
+            gatewayStatus: status,
+            paymentLink: null,
+          },
+          { where: { transactionReference: order_id }, returning: true },
+        );
+        updatedTrx = trx;
+      } else if (status !== "pending") {
+        const [count, trx] = await this.trxModel.update(
+          {
+            status: TransactionStatus.FAILED,
+            gatewayStatus: status,
+            paymentLink: null,
+          },
+          { where: { transactionReference: order_id }, returning: true },
+        );
+        updatedTrx = trx;
+      }
+
+      return {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Callback Received',
+        data: updatedTrx,
+      };
+    } catch (error) {
+      throw error
     }
   }
 

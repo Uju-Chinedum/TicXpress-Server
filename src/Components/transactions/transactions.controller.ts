@@ -7,17 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  Req,
   HttpCode,
   HttpStatus,
   Headers,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import {
-  InitializeTransactionDto,
-  PaystackCallbackDto,
-  PaystackWebhookDto,
-} from './dto/paystack.dto';
+import { InitializeTransactionDto } from './dto/create-transaction.dto';
+import { PaystackCallbackDto, PaystackWebhookDto } from './dto/paystack.dto';
 import { BadRequestException } from '../../common/exceptions';
 import { PAYSTACK_WEBHOOK_SIGNATURE_KEY } from '../global/constants';
 
@@ -25,19 +23,19 @@ import { PAYSTACK_WEBHOOK_SIGNATURE_KEY } from '../global/constants';
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  @Post('initialize')
-  async initializeTransaction(@Body() dto: InitializeTransactionDto) {
+  @Post('paystack/initialize')
+  async initializePaystackTransaction(@Body() dto: InitializeTransactionDto) {
     return await this.transactionsService.initializePaystackTransaction(dto);
   }
 
-  @Get('callback')
-  async verifyTransaction(@Query() query: PaystackCallbackDto) {
-    return await this.transactionsService.verifyTransaction(query);
+  @Get('paystack/callback')
+  async verifyPaystackTransaction(@Query() query: PaystackCallbackDto) {
+    return await this.transactionsService.verifyPaystackTransaction(query);
   }
 
-  @Post('webhook')
+  @Post('paystack/webhook')
   @HttpCode(HttpStatus.OK)
-  async paymentWebhookHandler(
+  async paystackPaymentWebhookHandler(
     @Body() dto: PaystackWebhookDto,
     @Headers() headers = {},
   ) {
@@ -49,6 +47,17 @@ export class TransactionsController {
     if (!result) {
       throw new BadRequestException('Invalid webhook request', '');
     }
+  }
+
+  @Post('coingate/initialize')
+  async initializeCoingateTransaction(@Body() dto: InitializeTransactionDto) {
+    return await this.transactionsService.initializeCoingateTransaction(dto);
+  }
+
+  @Post('coingate/callback')
+  @HttpCode(HttpStatus.OK)
+  async verifyCoingateTransaction(@Req() req, @Body() body) {
+    return await this.transactionsService.verifyCoingateTransaction(body);
   }
 
   @Get()

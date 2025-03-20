@@ -28,6 +28,10 @@ export class ErrorLogs extends Model {
   public level: string;
 
   @AllowNull(false)
+  @Column(DataType.STRING)
+  public name: string;
+
+  @AllowNull(false)
   @Column(DataType.TEXT)
   public message: string;
 

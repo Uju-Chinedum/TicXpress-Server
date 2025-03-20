@@ -1,8 +1,6 @@
 import {
   IsString,
   IsEmail,
-  IsDate,
-  IsBoolean,
   IsOptional,
   IsNotEmpty,
   IsNumber,
@@ -71,4 +69,11 @@ export class CreateTransactionDto {
   @IsString()
   @IsOptional()
   gatewayStatus?: string;
+}
+
+export class InitializeTransactionDto {
+  eventId: string;
+  fullName: string;
+  email: string;
+  phoneNumber?: string;
 }

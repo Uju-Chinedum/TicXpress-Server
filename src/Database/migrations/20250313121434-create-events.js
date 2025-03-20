@@ -23,7 +23,6 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
       phoneNumber: {
         type: Sequelize.STRING,
@@ -36,6 +35,7 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
         allowNull: false,
+        unique: true,
       },
       description: {
         type: Sequelize.STRING,
@@ -58,9 +58,32 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
+      cryptoAmount: {
+        type: Sequelize.DECIMAL(20, 8),
+        allowNull: true,
+      },
+      currency: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
       dashboardCode: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+      },
+      count: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      totalAmount: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
       createdAt: {
         type: Sequelize.DATE,

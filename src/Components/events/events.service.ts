@@ -12,6 +12,7 @@ import {
   NotFoundException,
 } from '../../common/exceptions';
 import { PaginationDto } from '../global/dto';
+import { uuidv7 } from 'uuidv7';
 
 @Injectable()
 export class EventsService {
@@ -66,6 +67,7 @@ export class EventsService {
 
       const event = await this.eventModel.create(
         {
+          id: uuidv7(),
           ...eventBody,
           dashboardCode,
         },
@@ -105,6 +107,8 @@ export class EventsService {
           time: fullEvent.time,
           paid: fullEvent.paid,
           amount: fullEvent.amount,
+          currency: fullEvent.currency,
+          cryptoAmount: fullEvent.cryptoAmount,
           createdAt: fullEvent.createdAt,
         },
       };

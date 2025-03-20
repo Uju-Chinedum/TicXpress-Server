@@ -63,11 +63,3 @@ export type Data = {
 export class PaystackCallbackDto {
   reference: string;
 }
-
-export class InitializeTransactionDto {
-  eventId: string;
-  fullName: string;
-  email: string;
-  amount: number;
-  phoneNumber?: string;
-}

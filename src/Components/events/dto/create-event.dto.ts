@@ -67,4 +67,14 @@ export class CreateEventDto {
   @IsOptional()
   @IsNumber()
   amount?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  cryptoAmount?: string;
 }
