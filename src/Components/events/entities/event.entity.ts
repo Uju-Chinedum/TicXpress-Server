@@ -70,6 +70,10 @@ export class Event extends Model {
   @Column(DataType.STRING)
   public currency: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public cryptoCurrency: string;
+
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)

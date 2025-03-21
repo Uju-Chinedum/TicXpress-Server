@@ -42,6 +42,7 @@ export class Transaction extends Model {
   public phoneNumber: string;
 
   @ForeignKey(() => Event)
+  @Unique
   @AllowNull(false)
   @Column(DataType.UUID)
   eventId: string;
@@ -50,6 +51,7 @@ export class Transaction extends Model {
   @Column(DataType.DECIMAL(20, 8))
   public amount: number;
 
+  @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
   public transactionReference: string;
