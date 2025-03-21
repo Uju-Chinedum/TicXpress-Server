@@ -12,9 +12,9 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-import { uuidv7 } from 'uuidv7';
 import { TransactionStatus, TransactionType } from '../types';
 import { Event } from '../../events/entities/event.entity';
+import { Registration } from 'src/Components/registrations/entities/registration.entity';
 
 @Table({
   tableName: 'transactions',
@@ -42,10 +42,14 @@ export class Transaction extends Model {
   public phoneNumber: string;
 
   @ForeignKey(() => Event)
-  @Unique
   @AllowNull(false)
   @Column(DataType.UUID)
   eventId: string;
+
+  @ForeignKey(() => Registration)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  registrationId: string;
 
   @AllowNull(false)
   @Column(DataType.DECIMAL(20, 8))
@@ -93,4 +97,7 @@ export class Transaction extends Model {
 
   @BelongsTo(() => Event)
   event: Event;
+
+  @BelongsTo(() => Registration)
+  registration: Registration;
 }

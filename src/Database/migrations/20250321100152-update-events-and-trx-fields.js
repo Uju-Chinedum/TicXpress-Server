@@ -9,6 +9,12 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
+    await queryInterface.changeColumn('events', 'dashboardCode', {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+    });
+
     await queryInterface.addColumn('events', 'cryptoCurrency', {
       type: Sequelize.STRING,
       allowNull: true,
@@ -50,6 +56,11 @@ module.exports = {
      * Example:
      * await queryInterface.dropTable('users');
      */
+    await queryInterface.changeColumn('events', 'dashboardCode', {
+      type: Sequelize.STRING,
+      allowNull: false,
+    });
+
     await queryInterface.removeColumn('events', 'cryptoCurrency');
 
     await queryInterface.removeColumn('events', 'cryptoSymbol');
@@ -63,13 +74,11 @@ module.exports = {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
-      unique: false,
     });
 
     await queryInterface.changeColumn('transactions', 'transactionReference', {
       type: Sequelize.STRING,
       allowNull: false,
-      unique: false,
     });
 
     await queryInterface.removeColumn('transactions', 'currency');

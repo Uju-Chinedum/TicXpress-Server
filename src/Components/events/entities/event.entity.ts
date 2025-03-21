@@ -9,7 +9,9 @@ import {
   Unique,
   UpdatedAt,
   Default,
+  HasMany,
 } from 'sequelize-typescript';
+import { Transaction } from 'src/Components/transactions/entities/transaction.entity';
 
 @Table({
   tableName: 'events',
@@ -107,4 +109,10 @@ export class Event extends Model {
   @UpdatedAt
   @Column(DataType.DATE)
   declare updatedAt: Date;
+
+  @HasMany(() => Transaction, {
+    as: "transactions",
+    hooks: true,
+  })
+  transactions: Transaction;
 }
