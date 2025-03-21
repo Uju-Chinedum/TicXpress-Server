@@ -2,7 +2,7 @@ TRUNCATE "error_logs";
 
 SELECT *
 FROM "events"
-ORDER BY "createdAt" DESC;
+ORDER BY "updatedAt" DESC;
 
 SELECT *
 FROM "transactions"

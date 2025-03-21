@@ -62,14 +62,24 @@ export class EventsService {
     const transaction = await this.sequelize.transaction();
 
     try {
-      const { name, email } = eventBody;
+      const { name, email, amount, currency, cryptoCurrency } = eventBody;
       const dashboardCode = Utils.generateDashboardCode();
+
+      let cryptoAmount: number | undefined = undefined;
+      if (amount && currency && cryptoCurrency) {
+        cryptoAmount = await Utils.fiatToCrypto(
+          amount,
+          currency,
+          cryptoCurrency,
+        );
+      }
 
       const event = await this.eventModel.create(
         {
           id: uuidv7(),
           ...eventBody,
           dashboardCode,
+          cryptoAmount,
         },
         { transaction },
       );
@@ -109,6 +119,8 @@ export class EventsService {
           amount: fullEvent.amount,
           currency: fullEvent.currency,
           cryptoAmount: fullEvent.cryptoAmount,
+          cryptoCurrency: fullEvent.cryptoCurrency,
+          cryptoSymbol: fullEvent.cryptoSymbol,
           createdAt: fullEvent.createdAt,
         },
       };

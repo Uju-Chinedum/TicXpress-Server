@@ -74,6 +74,10 @@ export class Event extends Model {
   @Column(DataType.STRING)
   public cryptoCurrency: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public cryptoSymbol: string;
+
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)

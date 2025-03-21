@@ -14,6 +14,11 @@ module.exports = {
       allowNull: true,
     });
 
+    await queryInterface.addColumn('events', 'cryptoSymbol', {
+      type: Sequelize.STRING,
+      allowNull: true,
+    });
+
     await queryInterface.changeColumn('transactions', 'eventId', {
       type: Sequelize.UUID,
       allowNull: false,
@@ -30,6 +35,11 @@ module.exports = {
       type: Sequelize.STRING,
       allowNull: false,
       unique: true,
+    });
+
+    await queryInterface.addColumn('transactions', 'currency', {
+      type: Sequelize.STRING,
+      allowNull: false,
     });
   },
 
@@ -42,6 +52,8 @@ module.exports = {
      */
     await queryInterface.removeColumn('events', 'cryptoCurrency');
 
+    await queryInterface.removeColumn('events', 'cryptoSymbol');
+
     await queryInterface.changeColumn('transactions', 'eventId', {
       type: Sequelize.UUID,
       allowNull: false,
@@ -59,5 +71,7 @@ module.exports = {
       allowNull: false,
       unique: false,
     });
+
+    await queryInterface.removeColumn('transactions', 'currency');
   },
 };

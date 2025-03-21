@@ -67,7 +67,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     if (axios.isAxiosError(exception) && exception.response) {
-      console.log(exception)
+      console.log(exception.response.data)
       // status = HttpStatus.BAD_REQUEST;
       // name = 'API Error';
       // message = exception.response.data.errors[0];

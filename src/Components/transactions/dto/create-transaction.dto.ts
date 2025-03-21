@@ -44,6 +44,13 @@ export class CreateTransactionDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
+    message: 'What is the currency of the amount?',
+  })
+  currency: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
     message: 'What is the transaction reference?',
   })
   transactionReference: string;

@@ -51,6 +51,10 @@ export class Transaction extends Model {
   @Column(DataType.DECIMAL(20, 8))
   public amount: number;
 
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public currency: string;
+
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)

@@ -106,6 +106,7 @@ export class TransactionsService {
         phoneNumber,
         eventId,
         amount: event.dataValues.amount,
+        currency: event.dataValues.currency,
         transactionReference: Utils.generateTrxReference(),
         type: 'Card',
         gatewayReference: data.reference,
@@ -169,7 +170,6 @@ export class TransactionsService {
           {
             status: TransactionStatus.FAILED,
             gatewayStatus,
-            paymentLink: null,
           },
           { where: { gatewayReference: dto.reference }, returning: true },
         );
@@ -248,7 +248,6 @@ export class TransactionsService {
           {
             status: TransactionStatus.FAILED,
             gatewayStatus,
-            paymentLink: null,
           },
           {
             where: { gatewayReference: dto.data.reference },
@@ -282,8 +281,8 @@ export class TransactionsService {
     const coingateTransaction: CoingateInitTransactionDto = {
       order_id: trxRef,
       price_amount: event.dataValues.cryptoAmount,
-      price_currency: event.dataValues.currency,
-      receive_currency: event.dataValues.currency,
+      price_currency: event.dataValues.cryptoSymbol,
+      receive_currency: event.dataValues.cryptoSymbol,
       title: event.dataValues.name,
       description: event.dataValues.description,
       callback_url: this.configService.get<string>('COINGATE_CALLBACK_URL')!,
@@ -311,6 +310,7 @@ export class TransactionsService {
         phoneNumber,
         eventId,
         amount: event.dataValues.cryptoAmount,
+        currency: event.dataValues.cryptoSymbol,
         transactionReference: trxRef,
         type: 'Crypto',
         gatewayReference: String(response.data.id),
@@ -332,7 +332,6 @@ export class TransactionsService {
 
   async verifyCoingateTransaction(body) {
     const { status, order_id } = body;
-    console.log(body)
 
     try {
       const transaction = await this.trxModel.findOne({
@@ -360,7 +359,6 @@ export class TransactionsService {
           {
             status: TransactionStatus.FAILED,
             gatewayStatus: status,
-            paymentLink: null,
           },
           { where: { transactionReference: order_id }, returning: true },
         );
