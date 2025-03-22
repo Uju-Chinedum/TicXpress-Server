@@ -61,7 +61,7 @@ export class Event extends Model {
   public paid: boolean;
 
   @AllowNull(true)
-  @Column(DataType.NUMBER)
+  @Column(DataType.INTEGER)
   public amount: number;
 
   @AllowNull(true)

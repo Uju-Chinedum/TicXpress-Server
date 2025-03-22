@@ -10,7 +10,6 @@ import { Sequelize } from 'sequelize-typescript';
 import { TransactionsService } from '../transactions/transactions.service';
 import { Event } from '../events/entities/event.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
-import { InitializeTransactionDto } from '../transactions/dto/create-transaction.dto';
 import {
   TransactionResponse,
   TransactionStatus,
@@ -18,6 +17,7 @@ import {
 } from '../transactions/types';
 import { uuidv7 } from 'uuidv7';
 import { Utils } from '../utils';
+import { InitializeTransactionDto } from '../transactions/dto/create-transaction.dto';
 
 @Injectable()
 export class RegistrationsService {
@@ -52,9 +52,11 @@ export class RegistrationsService {
   private getTransactionInitializer(type: TransactionType) {
     switch (type) {
       case TransactionType.CARD:
-        return this.transactionService.initializePaystackTransaction;
+        return (dto: InitializeTransactionDto) =>
+          this.transactionService.initializePaystackTransaction(dto);
       case TransactionType.CRYPTO:
-        return this.transactionService.initializeCoingateTransaction;
+        return (dto: InitializeTransactionDto) =>
+          this.transactionService.initializeCoingateTransaction(dto);
       default:
         throw new BadRequestException(
           'Invalid Payment Type',
@@ -88,6 +90,8 @@ export class RegistrationsService {
     try {
       let transactionId: string | undefined;
       const registrationId = uuidv7();
+      let success = false;
+      let registration: Registration;
 
       if (paid) {
         if (!type) {
@@ -97,9 +101,7 @@ export class RegistrationsService {
           );
         }
 
-        const initializeTrx = this.getTransactionInitializer(type).bind(
-          this.transactionService,
-        );
+        const initializeTrx = this.getTransactionInitializer(type);
         const trxResult: TransactionResponse = await initializeTrx({
           eventId,
           fullName,
@@ -108,6 +110,7 @@ export class RegistrationsService {
         });
 
         await this.checkTrxStatus(trxResult.data.id);
+        success = true;
 
         transactionId = trxResult.data.id;
         await this.trxModel.update(
@@ -116,28 +119,51 @@ export class RegistrationsService {
         );
       }
 
-      const registration = await this.registerModel.create(
-        {
-          id: registrationId,
-          ...registrationBody,
-          transactionId,
-          accessCode: Utils.generateAccessCode(),
-        },
-        { transaction },
-      );
+      if (!success) {
+        registration = await this.registerModel.create(
+          {
+            id: registrationId,
+            ...registrationBody,
+            transactionId,
+            accessCode: null,
+          },
+          { transaction },
+        );
 
-      await this.eventModel.update(
-        { count: event.count + 1 },
-        { where: { id: eventId }, transaction },
-      );
+        await this.trxModel.update(
+          { registrationId: registrationId, registrationCompleted: false },
+          { where: { id: transactionId }, transaction },
+        );
+      } else {
+        registration = await this.registerModel.create(
+          {
+            id: registrationId,
+            ...registrationBody,
+            transactionId,
+            accessCode: Utils.generateAccessCode(),
+          },
+          { transaction },
+        );
+
+        await this.trxModel.update(
+          { registrationId: registrationId, registrationCompleted: true },
+          { where: { id: transactionId }, transaction },
+        );
+
+        await this.eventModel.update(
+          { count: event.count + 1 },
+          { where: { id: eventId }, transaction },
+        );
+      }
 
       await transaction.commit();
 
       return {
         success: true,
         statusCode: HttpStatus.CREATED,
-        message:
-          'Registration created successfully. Please check your mail for details.',
+        message: success
+          ? 'Registration created successfully. Please check your mail for access code.'
+          : 'Registration Pending.',
         data: {
           id: registration.id,
           fullName: registration.fullName,

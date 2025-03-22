@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import {
   CreateTransactionDto,
   InitializeTransactionDto,
@@ -27,7 +27,11 @@ import {
   PAYSTACK_VERIFY_BASE_URL,
   PAYSTACK_WEBHOOK_CRYPTO_ALGO,
 } from '../global/constants';
-import { TransactionResponse, TransactionStatus, TransactionType } from './types';
+import {
+  TransactionResponse,
+  TransactionStatus,
+  TransactionType,
+} from './types';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { uuidv7 } from 'uuidv7';
 import { Utils } from '../utils';
@@ -35,6 +39,8 @@ import {
   CoingateInitTransactionDto,
   CoingateInitTransactionResponseDto,
 } from './dto/coingate.dto';
+import { RegistrationStatus } from '../registrations/types';
+import { Registration } from '../registrations/entities/registration.entity';
 
 @Injectable()
 export class TransactionsService {
@@ -44,9 +50,13 @@ export class TransactionsService {
     @InjectModel(Event)
     private eventModel: typeof Event,
     private configService: ConfigService,
+    @InjectModel(Registration)
+    private registerModel: typeof Registration,
   ) {}
 
-  async initializePaystackTransaction(dto: InitializeTransactionDto): Promise<TransactionResponse> {
+  async initializePaystackTransaction(
+    dto: InitializeTransactionDto,
+  ): Promise<TransactionResponse> {
     const { eventId, fullName, email, phoneNumber } = dto;
 
     const event = await this.eventModel.findOne({ where: { id: eventId } });
@@ -152,29 +162,15 @@ export class TransactionsService {
 
       const result = response.data;
       const gatewayStatus = result?.data?.status;
-
       const paymentConfirmed = gatewayStatus === 'success';
 
-      let updatedTrx: any;
+      const updatedTrx = await this.updateTransactionStatus(
+        dto.reference,
+        paymentConfirmed,
+        gatewayStatus,
+      );
       if (paymentConfirmed) {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.SUCCESS,
-            gatewayStatus,
-            paymentLink: null,
-          },
-          { where: { gatewayReference: dto.reference }, returning: true },
-        );
-        updatedTrx = trx;
-      } else {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.FAILED,
-            gatewayStatus,
-          },
-          { where: { gatewayReference: dto.reference }, returning: true },
-        );
-        updatedTrx = trx;
+        await this.completeRegistration(dto.reference);
       }
 
       return {
@@ -230,32 +226,13 @@ export class TransactionsService {
       const gatewayStatus = dto.data.status;
       const paymentConfirmed = gatewayStatus === 'success';
 
-      let updatedTrx: any;
+      const updatedTrx = this.updateTransactionStatus(
+        dto.data.reference!,
+        paymentConfirmed,
+        gatewayStatus,
+      );
       if (paymentConfirmed) {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.SUCCESS,
-            gatewayStatus,
-            paymentLink: null,
-          },
-          {
-            where: { gatewayReference: dto.data.reference },
-            returning: true,
-          },
-        );
-        updatedTrx = trx;
-      } else {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.FAILED,
-            gatewayStatus,
-          },
-          {
-            where: { gatewayReference: dto.data.reference },
-            returning: true,
-          },
-        );
-        updatedTrx = trx;
+        await this.completeRegistration(dto.data.reference!);
       }
 
       return {
@@ -345,27 +322,12 @@ export class TransactionsService {
           `No transaction found with reference: ${order_id}`,
         );
 
-      let updatedTrx: any;
-      if (status === 'paid') {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.SUCCESS,
-            gatewayStatus: status,
-            paymentLink: null,
-          },
-          { where: { transactionReference: order_id }, returning: true },
-        );
-        updatedTrx = trx;
-      } else if (status !== 'pending') {
-        const [count, trx] = await this.trxModel.update(
-          {
-            status: TransactionStatus.FAILED,
-            gatewayStatus: status,
-          },
-          { where: { transactionReference: order_id }, returning: true },
-        );
-        updatedTrx = trx;
-      }
+      const paymentConfirmed = status === 'paid';
+
+      const updatedTrx = await this.updateTransactionStatus(
+        order_id,
+        paymentConfirmed,
+      );
 
       return {
         success: true,
@@ -374,6 +336,70 @@ export class TransactionsService {
         data: updatedTrx,
       };
     } catch (error) {
+      throw error;
+    }
+  }
+
+  private async updateTransactionStatus(
+    reference: string,
+    paymentStatus: boolean,
+    gatewayStatus?: string,
+  ) {
+    const updateData: { status: TransactionStatus; gatewayStatus?: string } = {
+      status: paymentStatus
+        ? TransactionStatus.SUCCESS
+        : TransactionStatus.FAILED,
+    };
+    if (gatewayStatus) {
+      updateData.gatewayStatus = gatewayStatus;
+    }
+
+    const [count] = await this.trxModel.update(updateData, {
+      where: { gatewayReference: reference },
+    });
+
+    if (count === 0) return null;
+
+    return this.trxModel.findOne({ where: { gatewayReference: reference } });
+
+  }
+
+  private async completeRegistration(reference: string) {
+    const transaction = await this.trxModel.findOne({
+      where: { gatewayReference: reference },
+    });
+
+    if (
+      !transaction ||
+      !transaction.registrationId ||
+      transaction.registrationCompleted
+    ) {
+      return;
+    }
+
+    try {
+      await this.trxModel.update(
+        { registrationCompleted: true },
+        { where: { gatewayReference: reference } },
+      );
+
+      const registration = await this.registerModel.findByPk(
+        transaction.registrationId,
+      );
+
+      if (!registration) return;
+
+      await this.registerModel.update(
+        {
+          accessCode: Utils.generateAccessCode(),
+          status: RegistrationStatus.APPROVED,
+        },
+        { where: { id: registration.id } },
+      );
+
+      // Send email logic here...
+    } catch (error) {
+      console.error('Error completing registration:', error);
       throw error;
     }
   }

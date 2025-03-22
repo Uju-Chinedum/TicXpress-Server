@@ -39,6 +39,7 @@ module.exports = {
           key: 'id',
         },
         onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       amount: {
         type: Sequelize.DECIMAL(20, 8),

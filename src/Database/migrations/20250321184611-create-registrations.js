@@ -51,6 +51,11 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
+      status: {
+        type: Sequelize.ENUM(['Pending', 'Approved', 'Rejected']),
+        allowNull: false,
+        defaultValue: 'Pending',
+      },
       accessCode: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -73,6 +78,12 @@ module.exports = {
         key: 'id',
       },
       onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    });
+
+    await queryInterface.addColumn('transactions', 'registrationCompleted', {
+      type: Sequelize.BOOLEAN,
+      allowNull: true,
     });
   },
 
@@ -86,5 +97,7 @@ module.exports = {
     await queryInterface.dropTable('registrations');
 
     await queryInterface.removeColumn('transactions', 'registrationId');
+
+    await queryInterface.removeColumn('transactions', 'registrationCompleted');
   },
 };

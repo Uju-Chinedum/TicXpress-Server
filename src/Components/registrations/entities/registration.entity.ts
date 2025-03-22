@@ -10,9 +10,11 @@ import {
   UpdatedAt,
   ForeignKey,
   BelongsTo,
+  Default,
 } from 'sequelize-typescript';
 import { Event } from '../../events/entities/event.entity';
 import { Transaction } from '../../transactions/entities/transaction.entity';
+import { RegistrationStatus } from '../types';
 
 @Table({
   tableName: 'registrations',
@@ -48,6 +50,11 @@ export class Registration extends Model {
   @AllowNull(true)
   @Column(DataType.UUID)
   public transactionId: string;
+
+  @AllowNull(false)
+  @Default(RegistrationStatus.PENDING)
+  @Column(DataType.ENUM(...Object.values(RegistrationStatus)))
+  public status: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)

@@ -14,7 +14,7 @@ import {
 } from 'sequelize-typescript';
 import { TransactionStatus, TransactionType } from '../types';
 import { Event } from '../../events/entities/event.entity';
-import { Registration } from 'src/Components/registrations/entities/registration.entity';
+import { Registration } from '../../registrations/entities/registration.entity';
 
 @Table({
   tableName: 'transactions',
@@ -84,6 +84,10 @@ export class Transaction extends Model {
   @AllowNull(true)
   @Column(DataType.STRING)
   public gatewayStatus: string;
+
+  @AllowNull(true)
+  @Column(DataType.BOOLEAN)
+  public registrationCompleted: boolean;
 
   @AllowNull(false)
   @CreatedAt
