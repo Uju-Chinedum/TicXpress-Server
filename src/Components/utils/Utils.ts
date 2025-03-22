@@ -5,10 +5,11 @@ import {
   COINGECKO_LIST_URL,
 } from '../global/constants';
 import axios from 'axios';
+import { randomInt } from 'crypto';
 
 export class Utils {
   static generateDashboardCode(): string {
-    return randomstring.generate({ length: 6, charset: 'alphanumeric' });
+    return randomstring.generate({ length: 8, charset: 'alphanumeric' });
   }
 
   static paginateResponse<T = any>(
@@ -93,5 +94,9 @@ export class Utils {
     } catch (error) {
       throw error;
     }
+  }
+
+  static generateAccessCode(): string {
+    return randomInt(100000, 999999).toString();
   }
 }

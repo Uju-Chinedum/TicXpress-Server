@@ -47,7 +47,7 @@ export class Transaction extends Model {
   eventId: string;
 
   @ForeignKey(() => Registration)
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.UUID)
   registrationId: string;
 

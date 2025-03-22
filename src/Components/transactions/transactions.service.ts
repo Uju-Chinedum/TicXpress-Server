@@ -27,7 +27,7 @@ import {
   PAYSTACK_VERIFY_BASE_URL,
   PAYSTACK_WEBHOOK_CRYPTO_ALGO,
 } from '../global/constants';
-import { TransactionStatus } from './types';
+import { TransactionResponse, TransactionStatus, TransactionType } from './types';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { uuidv7 } from 'uuidv7';
 import { Utils } from '../utils';
@@ -46,7 +46,7 @@ export class TransactionsService {
     private configService: ConfigService,
   ) {}
 
-  async initializePaystackTransaction(dto: InitializeTransactionDto) {
+  async initializePaystackTransaction(dto: InitializeTransactionDto): Promise<TransactionResponse> {
     const { eventId, fullName, email, phoneNumber } = dto;
 
     const event = await this.eventModel.findOne({ where: { id: eventId } });
@@ -100,6 +100,7 @@ export class TransactionsService {
       result = response.data;
 
       const data = result.data;
+      const transactionId = uuidv7();
       const transaction: CreateTransactionDto = {
         fullName,
         email,
@@ -108,20 +109,20 @@ export class TransactionsService {
         amount: event.dataValues.amount,
         currency: event.dataValues.currency,
         transactionReference: Utils.generateTrxReference(),
-        type: 'Card',
+        type: TransactionType.CARD,
         gatewayReference: data.reference,
         paymentLink: data.authorization_url,
       };
 
       if (result.status === true) {
-        await this.trxModel.create({ id: uuidv7(), ...transaction });
+        await this.trxModel.create({ id: transactionId, ...transaction });
       }
 
       return {
         success: true,
         statusCode: HttpStatus.CREATED,
         message: 'Transaction in progress',
-        data: transaction,
+        data: { id: transactionId, ...transaction },
       };
     } catch (error) {
       throw error;
@@ -304,6 +305,7 @@ export class TransactionsService {
         },
       );
 
+      const transactionId = uuidv7();
       const transaction: CreateTransactionDto = {
         fullName,
         email,
@@ -312,18 +314,18 @@ export class TransactionsService {
         amount: event.dataValues.cryptoAmount,
         currency: event.dataValues.cryptoSymbol,
         transactionReference: trxRef,
-        type: 'Crypto',
+        type: TransactionType.CRYPTO,
         gatewayReference: String(response.data.id),
         paymentLink: response.data.payment_url,
       };
 
-      await this.trxModel.create({ id: uuidv7(), ...transaction });
+      await this.trxModel.create({ id: transactionId, ...transaction });
 
       return {
         success: true,
         statusCode: HttpStatus.CREATED,
         message: 'Transaction in progress',
-        data: transaction,
+        data: { id: transactionId, ...transaction },
       };
     } catch (error) {
       throw error;
@@ -354,7 +356,7 @@ export class TransactionsService {
           { where: { transactionReference: order_id }, returning: true },
         );
         updatedTrx = trx;
-      } else if (status !== "pending") {
+      } else if (status !== 'pending') {
         const [count, trx] = await this.trxModel.update(
           {
             status: TransactionStatus.FAILED,
@@ -372,7 +374,7 @@ export class TransactionsService {
         data: updatedTrx,
       };
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 

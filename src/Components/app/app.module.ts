@@ -5,6 +5,7 @@ import { dbConfig } from '../../Database/config/db.config';
 import { EventsModule } from '../events/events.module';
 import { GlobalModule } from '../global/global.module';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { RegistrationsModule } from '../registrations/registrations.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
     EventsModule,
     GlobalModule,
     TransactionsModule,
+    RegistrationsModule
   ],
 })
 export class AppModule {}

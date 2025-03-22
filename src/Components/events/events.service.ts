@@ -3,8 +3,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { Event } from './entities/event.entity';
-import { eventCreationEmail, Utils } from '../utils';
-import { EmailService } from '../utils';
+import { eventCreationEmail, Utils, EmailService } from '../utils';
 import { Sequelize } from 'sequelize-typescript';
 import {
   BadRequestException,

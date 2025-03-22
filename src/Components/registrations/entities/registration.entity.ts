@@ -1,0 +1,71 @@
+import {
+  AllowNull,
+  Column,
+  CreatedAt,
+  DataType,
+  Model,
+  PrimaryKey,
+  Table,
+  Unique,
+  UpdatedAt,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import { Event } from '../../events/entities/event.entity';
+import { Transaction } from '../../transactions/entities/transaction.entity';
+
+@Table({
+  tableName: 'registrations',
+  paranoid: false,
+  timestamps: true,
+  underscored: false,
+})
+export class Registration extends Model {
+  @PrimaryKey
+  @Unique
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  declare id: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public fullName: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public email: string;
+
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public phoneNumber: string;
+
+  @ForeignKey(() => Event)
+  @AllowNull(false)
+  @Column(DataType.UUID)
+  public eventId: string;
+
+  @ForeignKey(() => Transaction)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  public transactionId: string;
+
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  public accessCode: string;
+
+  @AllowNull(false)
+  @CreatedAt
+  @Column(DataType.DATE)
+  declare createdAt: Date;
+
+  @AllowNull(true)
+  @UpdatedAt
+  @Column(DataType.DATE)
+  declare updatedAt: Date;
+
+  @BelongsTo(() => Event)
+  event: Event;
+
+  @BelongsTo(() => Transaction)
+  transaction: Transaction;
+}

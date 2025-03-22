@@ -6,6 +6,7 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { TransactionType } from '../types';
 
 export class CreateTransactionDto {
   @ApiProperty()
@@ -60,7 +61,7 @@ export class CreateTransactionDto {
   @IsNotEmpty({
     message: 'What is your payment type?',
   })
-  type: 'Card' | 'Crypto';
+  type: TransactionType;
 
   @ApiProperty({ required: false })
   @IsString()
