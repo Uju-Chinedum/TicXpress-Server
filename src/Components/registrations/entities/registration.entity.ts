@@ -56,7 +56,8 @@ export class Registration extends Model {
   @Column(DataType.ENUM(...Object.values(RegistrationStatus)))
   public status: string;
 
-  @AllowNull(false)
+  @Unique
+  @AllowNull(true)
   @Column(DataType.STRING)
   public accessCode: string;
 

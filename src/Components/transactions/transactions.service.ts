@@ -256,6 +256,8 @@ export class TransactionsService {
       );
 
     const trxRef = Utils.generateTrxReference();
+    const token = trxRef.slice(5);
+
     const coingateTransaction: CoingateInitTransactionDto = {
       order_id: trxRef,
       price_amount: event.dataValues.cryptoAmount,
@@ -266,7 +268,7 @@ export class TransactionsService {
       callback_url: this.configService.get<string>('COINGATE_CALLBACK_URL')!,
       cancel_url: this.configService.get<string>('COINGATE_CANCEL_URL')!,
       success_url: this.configService.get<string>('COINGATE_SUCCESS_URL')!,
-      token: trxRef.slice(5),
+      token,
     };
 
     try {
@@ -292,7 +294,7 @@ export class TransactionsService {
         currency: event.dataValues.cryptoSymbol,
         transactionReference: trxRef,
         type: TransactionType.CRYPTO,
-        gatewayReference: String(response.data.id),
+        gatewayReference: token,
         paymentLink: response.data.payment_url,
       };
 
@@ -310,7 +312,7 @@ export class TransactionsService {
   }
 
   async verifyCoingateTransaction(body) {
-    const { status, order_id } = body;
+    const { status, order_id, token } = body;
 
     try {
       const transaction = await this.trxModel.findOne({
@@ -325,9 +327,12 @@ export class TransactionsService {
       const paymentConfirmed = status === 'paid';
 
       const updatedTrx = await this.updateTransactionStatus(
-        order_id,
+        token,
         paymentConfirmed,
       );
+      if (paymentConfirmed) {
+        await this.completeRegistration(token);
+      }
 
       return {
         success: true,
@@ -361,7 +366,6 @@ export class TransactionsService {
     if (count === 0) return null;
 
     return this.trxModel.findOne({ where: { gatewayReference: reference } });
-
   }
 
   private async completeRegistration(reference: string) {
@@ -372,7 +376,7 @@ export class TransactionsService {
     if (
       !transaction ||
       !transaction.registrationId ||
-      transaction.registrationCompleted
+        transaction.registrationCompleted
     ) {
       return;
     }

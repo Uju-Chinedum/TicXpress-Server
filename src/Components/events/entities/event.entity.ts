@@ -92,12 +92,12 @@ export class Event extends Model {
 
   @AllowNull(false)
   @Default(0)
-  @Column(DataType.NUMBER)
+  @Column(DataType.INTEGER)
   public count: number;
 
   @AllowNull(false)
   @Default(0)
-  @Column(DataType.NUMBER)
+  @Column(DataType.INTEGER)
   public totalAmount: number;
 
   @AllowNull(false)

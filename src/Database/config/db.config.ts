@@ -38,7 +38,6 @@ export const dbConfig = (
         : configService.get<string>('DEV_DB_NAME'),
     autoLoadModels: true,
     synchronize: !isProduction,
-    logging:
-      configService.get<string>('DB_LOGGING') === 'true' ? console.log : false,
+    logging: isProduction ? false : true,
   } as DBConfig;
 };

@@ -83,8 +83,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       context: context[1],
     });
 
-    console.log("Exception:", exception)
-
     response.status(status).json({
       success: false,
       statusCode: status,

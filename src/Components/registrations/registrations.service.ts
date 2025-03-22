@@ -10,14 +10,11 @@ import { Sequelize } from 'sequelize-typescript';
 import { TransactionsService } from '../transactions/transactions.service';
 import { Event } from '../events/entities/event.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
-import {
-  TransactionResponse,
-  TransactionStatus,
-  TransactionType,
-} from '../transactions/types';
+import { TransactionResponse, TransactionType } from '../transactions/types';
 import { uuidv7 } from 'uuidv7';
 import { Utils } from '../utils';
 import { InitializeTransactionDto } from '../transactions/dto/create-transaction.dto';
+import { RegistrationStatus } from './types';
 
 @Injectable()
 export class RegistrationsService {
@@ -31,23 +28,6 @@ export class RegistrationsService {
     @InjectModel(Transaction)
     private trxModel: typeof Transaction,
   ) {}
-
-  private async checkTrxStatus(trxId: string) {
-    const trx = await this.trxModel.findByPk(trxId);
-    if (!trx) {
-      throw new NotFoundException(
-        'Transaction not found',
-        `No transaction found with id: ${trxId}`,
-      );
-    }
-
-    if (trx.status !== TransactionStatus.SUCCESS) {
-      throw new BadRequestException(
-        'Transaction Failed',
-        'Transaction could not be completed. Please try again',
-      );
-    }
-  }
 
   private getTransactionInitializer(type: TransactionType) {
     switch (type) {
@@ -66,11 +46,12 @@ export class RegistrationsService {
   }
 
   async create(registrationBody: CreateRegistrationDto) {
-    if (!registrationBody)
+    if (!registrationBody) {
       throw new BadRequestException(
         'Missing data',
         'Please provide all details.',
       );
+    }
 
     const { eventId, paid, type, fullName, email, phoneNumber } =
       registrationBody;
@@ -89,9 +70,21 @@ export class RegistrationsService {
 
     try {
       let transactionId: string | undefined;
+      let paymentLink: string | undefined;
       const registrationId = uuidv7();
-      let success = false;
-      let registration: Registration;
+
+      const registration = await this.registerModel.create(
+        {
+          id: registrationId,
+          ...registrationBody,
+          transactionId: null,
+          accessCode: paid ? null : Utils.generateAccessCode(),
+          status: paid
+            ? RegistrationStatus.PENDING
+            : RegistrationStatus.APPROVED,
+        },
+        { transaction },
+      );
 
       if (paid) {
         if (!type) {
@@ -109,78 +102,72 @@ export class RegistrationsService {
           phoneNumber,
         });
 
-        await this.checkTrxStatus(trxResult.data.id);
-        success = true;
-
         transactionId = trxResult.data.id;
+        paymentLink = trxResult.data.paymentLink;
+
         await this.trxModel.update(
-          { registrationId },
+          { registrationId, registrationCompleted: false },
           { where: { id: transactionId }, transaction },
         );
-      }
 
-      if (!success) {
-        registration = await this.registerModel.create(
-          {
-            id: registrationId,
-            ...registrationBody,
-            transactionId,
-            accessCode: null,
+        await this.registerModel.update(
+          { transactionId: transactionId },
+          { where: { id: registrationId }, transaction },
+        );
+
+        await transaction.commit();
+
+        const fullEvent = event.get({ plain: true });
+        const fullRegistration = registration.get({ plain: true });
+        return {
+          success: true,
+          statusCode: HttpStatus.CREATED,
+          message: 'Registration Pending. Please proceed with payment',
+          data: {
+            id: fullRegistration.id,
+            fullName: fullRegistration.fullName,
+            email: fullRegistration.email,
+            phoneNumber: fullRegistration.phoneNumber,
+            accessCode: fullRegistration.accessCode,
+            createdAt: fullRegistration.createdAt,
+            event: {
+              id: fullEvent.id,
+              organizer: fullEvent.organizer,
+              name: fullEvent.name,
+              description: fullEvent.description,
+              location: fullEvent.location,
+              time: fullEvent.time,
+            },
+            paymentLink,
           },
-          { transaction },
-        );
-
-        await this.trxModel.update(
-          { registrationId: registrationId, registrationCompleted: false },
-          { where: { id: transactionId }, transaction },
-        );
+        };
       } else {
-        registration = await this.registerModel.create(
-          {
-            id: registrationId,
-            ...registrationBody,
-            transactionId,
-            accessCode: Utils.generateAccessCode(),
+        await transaction.commit();
+
+        const fullEvent = event.get({ plain: true });
+        const fullRegistration = registration.get({ plain: true });
+        return {
+          success: true,
+          statusCode: HttpStatus.CREATED,
+          message: 'Registration successful',
+          data: {
+            id: fullRegistration.id,
+            fullName: fullRegistration.fullName,
+            email: fullRegistration.email,
+            phoneNumber: fullRegistration.phoneNumber,
+            accessCode: fullRegistration.accessCode,
+            createdAt: fullRegistration.createdAt,
+            event: {
+              id: fullEvent.id,
+              organizer: fullEvent.organizer,
+              name: fullEvent.name,
+              description: fullEvent.description,
+              location: fullEvent.location,
+              time: fullEvent.time,
+            },
           },
-          { transaction },
-        );
-
-        await this.trxModel.update(
-          { registrationId: registrationId, registrationCompleted: true },
-          { where: { id: transactionId }, transaction },
-        );
-
-        await this.eventModel.update(
-          { count: event.count + 1 },
-          { where: { id: eventId }, transaction },
-        );
+        };
       }
-
-      await transaction.commit();
-
-      return {
-        success: true,
-        statusCode: HttpStatus.CREATED,
-        message: success
-          ? 'Registration created successfully. Please check your mail for access code.'
-          : 'Registration Pending.',
-        data: {
-          id: registration.id,
-          fullName: registration.fullName,
-          email: registration.email,
-          phoneNumber: registration.phoneNumber,
-          accessCode: registration.accessCode,
-          createdAt: registration.createdAt,
-          event: {
-            id: event.id,
-            organizer: event.organizer,
-            name: event.name,
-            description: event.description,
-            location: event.location,
-            time: event.time,
-          },
-        },
-      };
     } catch (error) {
       await transaction.rollback();
       throw error;
