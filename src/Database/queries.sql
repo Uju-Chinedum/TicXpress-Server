@@ -2,7 +2,7 @@ TRUNCATE "events" CASCADE;
 
 TRUNCATE "error_logs";
 
-TRUNCATE "transactions";
+TRUNCATE "transactions" CASCADE;
 
 TRUNCATE "registrations" CASCADE;
 

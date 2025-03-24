@@ -375,8 +375,8 @@ export class TransactionsService {
 
     if (
       !transaction ||
-      !transaction.registrationId ||
-        transaction.registrationCompleted
+      !transaction.dataValues.registrationId ||
+      transaction.dataValues.registrationCompleted
     ) {
       return;
     }
@@ -388,7 +388,7 @@ export class TransactionsService {
       );
 
       const registration = await this.registerModel.findByPk(
-        transaction.registrationId,
+        transaction.dataValues.registrationId,
       );
 
       if (!registration) return;
