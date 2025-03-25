@@ -6,10 +6,11 @@ import { Registration } from './entities/registration.entity';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { Event } from '../events/entities/event.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
+import { EmailService } from '../utils';
 
 @Module({
   controllers: [RegistrationsController],
-  providers: [RegistrationsService],
+  providers: [RegistrationsService, EmailService],
   imports: [
     SequelizeModule.forFeature([Registration, Event, Transaction]),
     TransactionsModule,

@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Registration } from './entities/registration.entity';
 import {
   BadRequestException,
+  InternalServerException,
   NotFoundException,
 } from '../../common/exceptions';
 import { Sequelize } from 'sequelize-typescript';
@@ -12,9 +13,10 @@ import { Event } from '../events/entities/event.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
 import { TransactionResponse, TransactionType } from '../transactions/types';
 import { uuidv7 } from 'uuidv7';
-import { Utils } from '../utils';
+import { EmailService, Utils } from '../utils';
 import { InitializeTransactionDto } from '../transactions/dto/create-transaction.dto';
 import { RegistrationStatus } from './types';
+import { eventRegistrationEmail } from '../utils/templates/event-registration';
 
 @Injectable()
 export class RegistrationsService {
@@ -27,6 +29,7 @@ export class RegistrationsService {
     private transactionService: TransactionsService,
     @InjectModel(Transaction)
     private trxModel: typeof Transaction,
+    private emailService: EmailService,
   ) {}
 
   private getTransactionInitializer(type: TransactionType) {
@@ -142,10 +145,39 @@ export class RegistrationsService {
           },
         };
       } else {
+        const fullEvent = event.get({ plain: true });
+
+        const emailResponse = await this.emailService.sendEmail(
+          email,
+          `Registration successful for ${fullEvent.name}`,
+          eventRegistrationEmail(
+            fullEvent.id,
+            fullEvent.name,
+            fullEvent.time,
+            fullEvent.location,
+            fullEvent.description,
+            fullName,
+            registration.dataValues.accessCode,
+          ),
+        );
+
+        if (!emailResponse.success) {
+          await transaction.rollback();
+          throw new InternalServerException(
+            'Email Error',
+            'Error while sending email',
+          );
+        }
+
+        await this.eventModel.update(
+          { count: event.dataValues.count + 1 },
+          { where: { id: event.id }, transaction },
+        );
+
         await transaction.commit();
 
-        const fullEvent = event.get({ plain: true });
         const fullRegistration = registration.get({ plain: true });
+
         return {
           success: true,
           statusCode: HttpStatus.CREATED,

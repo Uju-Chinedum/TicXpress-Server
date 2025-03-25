@@ -17,6 +17,7 @@ import {
 import { Event } from '../events/entities/event.entity';
 import {
   BadRequestException,
+  InternalServerException,
   NotFoundException,
 } from '../../common/exceptions';
 import { ConfigService } from '@nestjs/config';
@@ -34,13 +35,15 @@ import {
 } from './types';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { uuidv7 } from 'uuidv7';
-import { Utils } from '../utils';
+import { EmailService, Utils } from '../utils';
 import {
   CoingateInitTransactionDto,
   CoingateInitTransactionResponseDto,
 } from './dto/coingate.dto';
 import { RegistrationStatus } from '../registrations/types';
 import { Registration } from '../registrations/entities/registration.entity';
+import { eventRegistrationEmail } from '../utils/templates/event-registration';
+import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
 export class TransactionsService {
@@ -52,6 +55,8 @@ export class TransactionsService {
     private configService: ConfigService,
     @InjectModel(Registration)
     private registerModel: typeof Registration,
+    private sequelize: Sequelize,
+    private emailService: EmailService,
   ) {}
 
   async initializePaystackTransaction(
@@ -176,7 +181,8 @@ export class TransactionsService {
       return {
         success: true,
         statusCode: HttpStatus.OK,
-        message: 'Transaction Verified',
+        message:
+          'Transaction Verification in Progress.  Check your email for your access code.',
         data: updatedTrx,
       };
     } catch (error) {
@@ -238,7 +244,8 @@ export class TransactionsService {
       return {
         success: true,
         statusCode: HttpStatus.OK,
-        message: 'Transaction Verified',
+        message:
+          'Transaction Verification in Progress. Check your email for your access code.',
         data: updatedTrx,
       };
     } catch (error) {
@@ -337,7 +344,8 @@ export class TransactionsService {
       return {
         success: true,
         statusCode: HttpStatus.OK,
-        message: 'Callback Received',
+        message:
+          'Transaction Verification in Progress. Check your email for your access code.',
         data: updatedTrx,
       };
     } catch (error) {
@@ -349,7 +357,7 @@ export class TransactionsService {
     reference: string,
     paymentStatus: boolean,
     gatewayStatus?: string,
-  ) {
+  ): Promise<Transaction | null> {
     const updateData: { status: TransactionStatus; gatewayStatus?: string } = {
       status: paymentStatus
         ? TransactionStatus.SUCCESS
@@ -381,30 +389,82 @@ export class TransactionsService {
       return;
     }
 
+    const t = await this.sequelize.transaction();
+
     try {
       await this.trxModel.update(
         { registrationCompleted: true },
-        { where: { gatewayReference: reference } },
+        { where: { gatewayReference: reference }, transaction: t },
       );
 
       const registration = await this.registerModel.findByPk(
         transaction.dataValues.registrationId,
       );
 
-      if (!registration) return;
+      if (!registration) {
+        await t.rollback();
+        return;
+      }
 
       await this.registerModel.update(
         {
           accessCode: Utils.generateAccessCode(),
           status: RegistrationStatus.APPROVED,
         },
-        { where: { id: registration.id } },
+        { where: { id: registration.id }, transaction: t },
       );
 
-      // Send email logic here...
+      const updatedRegistration = await this.registerModel.findByPk(
+        registration.id,
+      );
+
+      const event = await this.eventModel.findByPk(
+        registration.dataValues.eventId,
+      );
+      if (!event) {
+        await t.rollback();
+        return;
+      }
+
+      await this.eventModel.update(
+        {
+          count: event.dataValues.count + 1,
+          totalAmount: event.dataValues.totalAmount + event.dataValues.amount,
+        },
+        { where: { id: event.id }, transaction: t },
+      );
+
+      await t.commit();
+
+      await this.sendRegistrationEmail(updatedRegistration, event);
     } catch (error) {
       console.error('Error completing registration:', error);
       throw error;
+    }
+  }
+
+  private async sendRegistrationEmail(registration, event) {
+    const emailContent = eventRegistrationEmail(
+      event.dataValues.id,
+      event.dataValues.name,
+      event.dataValues.time,
+      event.dataValues.location,
+      event.dataValues.description,
+      registration.dataValues.fullName,
+      registration.dataValues.accessCode,
+    );
+
+    const emailResponse = await this.emailService.sendEmail(
+      registration.dataValues.email,
+      `Registration successful for ${event.dataValues.name}`,
+      emailContent,
+    );
+
+    if (!emailResponse.success) {
+      throw new InternalServerException(
+        'Email Error',
+        'Error while sending email',
+      );
     }
   }
 

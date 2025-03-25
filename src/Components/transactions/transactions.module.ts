@@ -5,10 +5,11 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import { Event } from '../events/entities/event.entity';
 import { Registration } from '../registrations/entities/registration.entity';
+import { EmailService } from '../utils';
 
 @Module({
   controllers: [TransactionsController],
-  providers: [TransactionsService],
+  providers: [TransactionsService, EmailService],
   imports: [SequelizeModule.forFeature([Transaction, Event, Registration])],
   exports: [TransactionsService],
 })
