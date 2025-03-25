@@ -414,10 +414,6 @@ export class TransactionsService {
         { where: { id: registration.id }, transaction: t },
       );
 
-      const updatedRegistration = await this.registerModel.findByPk(
-        registration.id,
-      );
-
       const event = await this.eventModel.findByPk(
         registration.dataValues.eventId,
       );
@@ -436,6 +432,9 @@ export class TransactionsService {
 
       await t.commit();
 
+      const updatedRegistration = await this.registerModel.findByPk(
+        registration.id,
+      );
       await this.sendRegistrationEmail(updatedRegistration, event);
     } catch (error) {
       console.error('Error completing registration:', error);

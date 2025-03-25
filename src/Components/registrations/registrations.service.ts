@@ -56,7 +56,7 @@ export class RegistrationsService {
       );
     }
 
-    const { eventId, paid, type, fullName, email, phoneNumber } =
+    const { eventId, type, fullName, email, phoneNumber } =
       registrationBody;
 
     const event = await this.eventModel.findOne({
@@ -69,6 +69,7 @@ export class RegistrationsService {
       );
     }
 
+    const paid = event.dataValues.paid;
     const transaction = await this.sequelize.transaction();
 
     try {

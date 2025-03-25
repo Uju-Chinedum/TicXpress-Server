@@ -37,13 +37,6 @@ export class CreateRegistrationDto {
   eventId: string;
 
   @ApiProperty()
-  @IsBoolean()
-  @IsNotEmpty({
-    message: 'Is the event paid?',
-  })
-  paid: boolean;
-
-  @ApiProperty()
   @IsOptional()
   @IsString()
   type?: TransactionType;
