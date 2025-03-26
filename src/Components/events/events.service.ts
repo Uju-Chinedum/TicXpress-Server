@@ -35,6 +35,10 @@ export class EventsService {
     'time',
     'paid',
     'amount',
+    'cryptoAmount',
+    'currency',
+    'cryptoCurrency',
+    'cryptoSymbol',
     'updatedAt',
   ];
 
@@ -49,8 +53,12 @@ export class EventsService {
     'time',
     'paid',
     'amount',
+    'cryptoAmount',
+    'currency',
+    'cryptoCurrency',
+    'cryptoSymbol',
     'active',
-    'count',
+    'registered',
     'totalAmount',
     'updatedAt',
   ];
@@ -63,6 +71,7 @@ export class EventsService {
     'eventId',
     'status',
     'accessCode',
+    'verified',
     'updatedAt',
   ];
 
@@ -284,6 +293,8 @@ export class EventsService {
         'Please provide your dashboad code to access this page',
       );
 
+    const transaction = await this.sequelize.transaction();
+
     try {
       const event = await this.eventModel.findOne({
         where: { dashboardCode },
@@ -324,13 +335,36 @@ export class EventsService {
           `Attendee with access code matching ${accessCode} is not yet approved`,
         );
 
+      if (attendee.dataValues.verified)
+        throw new BadRequestException(
+          'Attendee Already Verified',
+          `Attendee with access code matching ${accessCode} is already verified`,
+        );
+
+      const [count, verified] = await this.registerModel.update(
+        { verified: true },
+        {
+          where: { accessCode },
+          transaction,
+          returning: this.attendeeAttributes,
+        },
+      );
+
+      await this.eventModel.update(
+        { registered: Sequelize.literal('registered + 1') },
+        { where: { id: event.id }, transaction },
+      );
+
+      await transaction.commit();
+
       return {
         success: true,
         statusCode: HttpStatus.OK,
-        message: 'Gotten attendee successfully',
-        data: attendee,
+        message: 'Verified attendee successfully',
+        data: verified[0],
       };
     } catch (error) {
+      await transaction.rollback();
       throw error;
     }
   }

@@ -424,8 +424,10 @@ export class TransactionsService {
 
       await this.eventModel.update(
         {
-          count: event.dataValues.count + 1,
-          totalAmount: event.dataValues.totalAmount + event.dataValues.amount,
+          registered: Sequelize.literal('registered + 1'),
+          totalAmount: Sequelize.literal(
+            `totalAmount + ${event.dataValues.amount}`,
+          ),
         },
         { where: { id: event.id }, transaction: t },
       );

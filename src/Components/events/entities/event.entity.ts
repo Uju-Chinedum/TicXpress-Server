@@ -93,12 +93,17 @@ export class Event extends Model {
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  public count: number;
+  public registered: number;
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
   public totalAmount: number;
+
+  @AllowNull(false)
+  @Default(0)
+  @Column(DataType.INTEGER)
+  public attended: number;
 
   @AllowNull(false)
   @CreatedAt
@@ -111,7 +116,7 @@ export class Event extends Model {
   declare updatedAt: Date;
 
   @HasMany(() => Transaction, {
-    as: "transactions",
+    as: 'transactions',
     hooks: true,
   })
   transactions: Transaction;

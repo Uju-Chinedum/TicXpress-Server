@@ -62,6 +62,11 @@ export class Registration extends Model {
   public accessCode: string;
 
   @AllowNull(false)
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  public verified: boolean;
+
+  @AllowNull(false)
   @CreatedAt
   @Column(DataType.DATE)
   declare createdAt: Date;

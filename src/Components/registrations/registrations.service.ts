@@ -56,8 +56,7 @@ export class RegistrationsService {
       );
     }
 
-    const { eventId, type, fullName, email, phoneNumber } =
-      registrationBody;
+    const { eventId, type, fullName, email, phoneNumber } = registrationBody;
 
     const event = await this.eventModel.findOne({
       where: { id: eventId, active: true },
@@ -171,7 +170,7 @@ export class RegistrationsService {
         }
 
         await this.eventModel.update(
-          { count: event.dataValues.count + 1 },
+          { registered: Sequelize.literal('registered + 1') },
           { where: { id: event.id }, transaction },
         );
 
