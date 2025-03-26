@@ -9,9 +9,11 @@ import {
   BadRequestException,
   InternalServerException,
   NotFoundException,
+  UnauthorizedException,
 } from '../../common/exceptions';
 import { PaginationDto } from '../global/dto';
 import { uuidv7 } from 'uuidv7';
+import { Registration } from '../registrations/entities/registration.entity';
 
 @Injectable()
 export class EventsService {
@@ -20,9 +22,11 @@ export class EventsService {
     private eventModel: typeof Event,
     private emailService: EmailService,
     private sequelize: Sequelize,
+    @InjectModel(Registration)
+    private registerModel: typeof Registration,
   ) {}
 
-  private readonly attendeeAttributes: string[] = [
+  private readonly eventAttributes: string[] = [
     'id',
     'organizer',
     'name',
@@ -48,6 +52,17 @@ export class EventsService {
     'active',
     'count',
     'totalAmount',
+    'updatedAt',
+  ];
+
+  private readonly attendeeAttributes: string[] = [
+    'id',
+    'fullName',
+    'email',
+    'phoneNumber',
+    'eventId',
+    'status',
+    'accessCode',
     'updatedAt',
   ];
 
@@ -137,7 +152,7 @@ export class EventsService {
 
       const events = await this.eventModel.findAndCountAll({
         where: { active: true },
-        attributes: this.attendeeAttributes,
+        attributes: this.eventAttributes,
         offset: skip,
         limit,
         order: [['updatedAt', 'DESC']],
@@ -158,7 +173,7 @@ export class EventsService {
     try {
       const event = await this.eventModel.findOne({
         where: { id, active: true },
-        attributes: this.attendeeAttributes,
+        attributes: this.eventAttributes,
       });
       if (!event)
         throw new NotFoundException(
@@ -179,9 +194,9 @@ export class EventsService {
 
   async getDetails(dashboardCode: string) {
     if (!dashboardCode)
-      throw new BadRequestException(
-        'Missing Details',
-        'Please provide your dashboad code',
+      throw new UnauthorizedException(
+        'Permission Denied',
+        'Please provide your dashboad code to access this page',
       );
 
     try {
@@ -207,6 +222,12 @@ export class EventsService {
   }
 
   async update(dashboardCode: string, updateEventDto: UpdateEventDto) {
+    if (!dashboardCode)
+      throw new UnauthorizedException(
+        'Permission Denied',
+        'Please provide your dashboad code to access this page',
+      );
+
     try {
       const [count, event] = await this.eventModel.update(
         { ...updateEventDto },
@@ -231,6 +252,12 @@ export class EventsService {
   }
 
   async remove(dashboardCode: string) {
+    if (!dashboardCode)
+      throw new UnauthorizedException(
+        'Permission Denied',
+        'Please provide your dashboad code to access this page',
+      );
+
     try {
       const event = await this.eventModel.destroy({ where: { dashboardCode } });
       if (event === 0)
@@ -244,6 +271,64 @@ export class EventsService {
         statusCode: 200,
         message: 'Deleted event successfully',
         data: {},
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async verifyAttendee(dashboardCode: string, accessCode: string) {
+    if (!dashboardCode)
+      throw new UnauthorizedException(
+        'Permission Denied',
+        'Please provide your dashboad code to access this page',
+      );
+
+    try {
+      const event = await this.eventModel.findOne({
+        where: { dashboardCode },
+        attributes: this.organizerAttributes,
+      });
+      if (!event)
+        throw new NotFoundException(
+          'Event Not Found',
+          `No event found with dashboard code matching ${dashboardCode} or access code matching ${accessCode}`,
+        );
+
+      if (!accessCode)
+        throw new BadRequestException(
+          'Missing Details',
+          "Please provide attendee's access code.",
+        );
+
+      const attendee = await this.registerModel.findOne({
+        where: { accessCode },
+        attributes: this.attendeeAttributes,
+      });
+
+      if (!attendee)
+        throw new NotFoundException(
+          'Attendee Not Found',
+          `No attendee found with access code matching ${accessCode}`,
+        );
+
+      if (attendee.dataValues.eventId !== event.id)
+        throw new BadRequestException(
+          'Attendee Not Found',
+          `The access code provided is invalid for this event`,
+        );
+
+      if (attendee.dataValues.status !== 'Approved')
+        throw new BadRequestException(
+          'Attendee Not Approved',
+          `Attendee with access code matching ${accessCode} is not yet approved`,
+        );
+
+      return {
+        success: true,
+        statusCode: HttpStatus.OK,
+        message: 'Gotten attendee successfully',
+        data: attendee,
       };
     } catch (error) {
       throw error;

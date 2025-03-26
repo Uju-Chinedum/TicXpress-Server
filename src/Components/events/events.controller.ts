@@ -27,18 +27,26 @@ export class EventsController {
     return this.eventsService.findAll(pagination);
   }
 
-  @Get('organizer/:code')
-  getStats(@Param('code') code: string) {
+  @Get('organizer')
+  getStats(@Query('code') code: string) {
     return this.eventsService.getDetails(code);
   }
 
-  @Patch('organizer/:code')
-  update(@Param('code') code: string, @Body() updateEventDto: UpdateEventDto) {
+  @Get('organizer/registrations')
+  getRegistrations(
+    @Query('dashboardCode') dashboardCode: string,
+    @Body('accessCode') accessCode: string,
+  ) {
+    return this.eventsService.verifyAttendee(dashboardCode, accessCode);
+  }
+
+  @Patch('organizer')
+  update(@Query('code') code: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(code, updateEventDto);
   }
 
-  @Delete('organizer/:code')
-  remove(@Param('code') code: string) {
+  @Delete('organizer')
+  remove(@Query('code') code: string) {
     return this.eventsService.remove(code);
   }
 
