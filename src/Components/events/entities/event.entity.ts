@@ -48,6 +48,11 @@ export class Event extends Model {
   public description: string;
 
   @AllowNull(false)
+  @Default(0)
+  @Column(DataType.INTEGER)
+  public capacity: number;
+
+  @AllowNull(false)
   @Column(DataType.STRING)
   public location: string;
 

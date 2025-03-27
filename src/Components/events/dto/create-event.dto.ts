@@ -45,6 +45,13 @@ export class CreateEventDto {
   description: string;
 
   @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty({
+    message: 'What is your event capacity?',
+  })
+  capacity: number;
+
+  @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'Where is your event?',

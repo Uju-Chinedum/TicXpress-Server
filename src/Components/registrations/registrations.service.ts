@@ -70,6 +70,16 @@ export class RegistrationsService {
       );
     }
 
+    if (
+      event.dataValues.capacity !== 0 &&
+      event.dataValues.registered === event.dataValues.capacity
+    ) {
+      throw new BadRequestException(
+        'Capacity Filled',
+        'The capacity for this event has been reached',
+      );
+    }
+
     const isPaidEvent = event.dataValues.paid;
     const transaction = await this.sequelize.transaction();
     const baseUrl =
@@ -182,19 +192,19 @@ export class RegistrationsService {
       statusCode: status,
       message,
       data: {
-        id: registration.id,
-        fullName: registration.fullName,
-        email: registration.email,
-        phoneNumber: registration.phoneNumber,
-        accessCode: registration.accessCode,
-        createdAt: registration.createdAt,
+        id: registration.dataValues.id,
+        fullName: registration.dataValues.fullName,
+        email: registration.dataValues.email,
+        phoneNumber: registration.dataValues.phoneNumber,
+        accessCode: registration.dataValues.accessCode,
+        createdAt: registration.dataValues.createdAt,
         event: {
-          id: event.id,
-          organizer: event.organizer,
-          name: event.name,
-          description: event.description,
-          location: event.location,
-          time: event.time,
+          id: event.dataValues.id,
+          organizer: event.dataValues.organizer,
+          name: event.dataValues.name,
+          description: event.dataValues.description,
+          location: event.dataValues.location,
+          time: event.dataValues.time,
         },
         paymentLink,
       },
