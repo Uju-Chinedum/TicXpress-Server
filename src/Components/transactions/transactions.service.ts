@@ -466,11 +466,19 @@ export class TransactionsService {
       registration.dataValues.accessCode,
       eventUrl,
     );
+    const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
 
     const emailResponse = await this.emailService.sendEmail(
       registration.dataValues.email,
       `Registration successful for ${event.dataValues.name}`,
       emailContent,
+      [
+        {
+          filename: 'event_qrcode.png',
+          content: qrCodeBuffer,
+          contentType: 'image/png',
+        },
+      ]
     );
 
     if (!emailResponse.success) {

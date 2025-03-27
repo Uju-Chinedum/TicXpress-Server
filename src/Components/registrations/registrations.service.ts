@@ -139,6 +139,8 @@ export class RegistrationsService {
       }
 
       const eventUrl = `${baseUrl}/events/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
+      const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
+
       const emailResponse = await this.emailService.sendEmail(
         email,
         `Registration successful for ${event.dataValues.name}`,
@@ -152,6 +154,13 @@ export class RegistrationsService {
           registration.dataValues.accessCode,
           eventUrl,
         ),
+        [
+          {
+            filename: 'event_qrcode.png',
+            content: qrCodeBuffer,
+            contentType: 'image/png',
+          },
+        ],
       );
 
       if (!emailResponse.success) {

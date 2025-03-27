@@ -6,6 +6,7 @@ import {
 } from '../global/constants';
 import axios from 'axios';
 import { randomInt } from 'crypto';
+import * as QRCode from 'qrcode';
 
 export class Utils {
   static generateDashboardCode(): string {
@@ -98,5 +99,9 @@ export class Utils {
 
   static generateAccessCode(): string {
     return randomInt(100000, 999999).toString();
+  }
+
+  static async generateQRCode(eventUrl: string): Promise<Buffer> {
+    return await QRCode.toBuffer(eventUrl);
   }
 }

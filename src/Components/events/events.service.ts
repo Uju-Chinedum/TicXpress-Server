@@ -125,13 +125,20 @@ export class EventsService {
         { transaction },
       );
 
+      const eventUrl = `${baseUrl}/${name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
+      const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
+
       const emailResponse = await this.emailService.sendEmail(
         email,
         `${name} created successfully`,
-        eventCreationEmail(
-          event,
-          `${baseUrl}/${name.replace(' ', '').toLowerCase()}/dashboard`,
-        ),
+        eventCreationEmail(event, eventUrl),
+        [
+          {
+            filename: 'event_qrcode.png',
+            content: qrCodeBuffer,
+            contentType: 'image/png',
+          },
+        ],
       );
 
       if (!emailResponse.success) {
@@ -275,10 +282,7 @@ export class EventsService {
       });
 
       if (!attendee)
-        throw new BadRequestException(
-          'Invalid Access',
-          'Attendee not found',
-        );
+        throw new BadRequestException('Invalid Access', 'Attendee not found');
 
       if (attendee.dataValues.eventId !== event.id)
         throw new BadRequestException(

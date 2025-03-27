@@ -7,7 +7,7 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    this.initializeTransporter()
+    this.initializeTransporter();
   }
 
   private async initializeTransporter() {
@@ -40,13 +40,24 @@ export class EmailService {
     });
   }
 
-  async sendEmail(to: string, subject: string, html: string) {
+  async sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+    attachments?: {
+      filename: string;
+      content?: string | Buffer;
+      path?: string;
+      contentType?: string;
+    }[],
+  ) {
     try {
       const mailOptions = {
         from: `"TicXpress" <${process.env.MAIL_USERNAME}>`,
         to,
         subject,
         html,
+        attachments,
       };
 
       const info = await this.transporter.sendMail(mailOptions);
