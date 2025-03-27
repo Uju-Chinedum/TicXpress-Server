@@ -1,6 +1,6 @@
 import { Event } from '../../events/entities/event.entity';
 
-export const eventCreationEmail = (event: Event) => {
+export const eventCreationEmail = (event: Event, eventUrl: string) => {
   const {
     name,
     organizer,
@@ -116,7 +116,7 @@ export const eventCreationEmail = (event: Event) => {
                   <p><strong>🔑 Dashboard Code:</strong> ${dashboardCode}</p>
               </div>
               
-              <a href="https://ticxpress.com/dashboard/${dashboardCode}" class="cta-button">View Event Dashboard</a>
+              <a href="${eventUrl}" class="cta-button">View Event Dashboard</a>
               <p>If you have any questions, feel free to contact us.</p>
           </div>
           <div class="footer">© 2025 TicXpress | All rights reserved.</div>

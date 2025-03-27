@@ -6,6 +6,7 @@ export const eventRegistrationEmail = (
   eventDescription: string,
   fullName: string,
   accessCode: string,
+  eventUrl: string,
 ): string => {
   const styles = `<style>
         body {
@@ -98,7 +99,7 @@ export const eventRegistrationEmail = (
                 <p><strong>🎟 Access Code:</strong> ${accessCode}</p>
             </div>
             
-            <a href="https://ticxpress.com/events/${eventId}" class="cta-button">View Event Details</a>
+            <a href="${eventUrl}" class="cta-button">View Event Details</a>
             <p>If you have any questions, feel free to contact us.</p>
         </div>
         <div class="footer">© 2025 TicXpress | All rights reserved.</div>

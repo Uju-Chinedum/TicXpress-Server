@@ -44,6 +44,7 @@ import { RegistrationStatus } from '../registrations/types';
 import { Registration } from '../registrations/entities/registration.entity';
 import { eventRegistrationEmail } from '../utils/templates/event-registration';
 import { Sequelize } from 'sequelize-typescript';
+import { Request } from 'express';
 
 @Injectable()
 export class TransactionsService {
@@ -144,7 +145,7 @@ export class TransactionsService {
     }
   }
 
-  async verifyPaystackTransaction(dto: PaystackCallbackDto) {
+  async verifyPaystackTransaction(dto: PaystackCallbackDto, req?: Request) {
     const transaction = await this.trxModel.findOne({
       where: { gatewayReference: dto.reference },
     });
@@ -175,7 +176,7 @@ export class TransactionsService {
         gatewayStatus,
       );
       if (paymentConfirmed) {
-        await this.completeRegistration(dto.reference);
+        await this.completeRegistration(dto.reference, req);
       }
 
       return {
@@ -190,7 +191,11 @@ export class TransactionsService {
     }
   }
 
-  async handlePaystackWebhook(dto: PaystackWebhookDto, signature: string) {
+  async handlePaystackWebhook(
+    dto: PaystackWebhookDto,
+    signature: string,
+    req?: Request,
+  ) {
     if (!dto.data) return false;
 
     let isValidEvent: string | boolean = false;
@@ -238,7 +243,7 @@ export class TransactionsService {
         gatewayStatus,
       );
       if (paymentConfirmed) {
-        await this.completeRegistration(dto.data.reference!);
+        await this.completeRegistration(dto.data.reference!, req);
       }
 
       return {
@@ -318,7 +323,7 @@ export class TransactionsService {
     }
   }
 
-  async verifyCoingateTransaction(body) {
+  async verifyCoingateTransaction(req, body) {
     const { status, order_id, token } = body;
 
     try {
@@ -338,7 +343,7 @@ export class TransactionsService {
         paymentConfirmed,
       );
       if (paymentConfirmed) {
-        await this.completeRegistration(token);
+        await this.completeRegistration(token, req);
       }
 
       return {
@@ -376,7 +381,7 @@ export class TransactionsService {
     return this.trxModel.findOne({ where: { gatewayReference: reference } });
   }
 
-  private async completeRegistration(reference: string) {
+  private async completeRegistration(reference: string, req?: Request) {
     const transaction = await this.trxModel.findOne({
       where: { gatewayReference: reference },
     });
@@ -426,7 +431,7 @@ export class TransactionsService {
         {
           registered: Sequelize.literal('registered + 1'),
           totalAmount: Sequelize.literal(
-            `totalAmount + ${event.dataValues.amount}`,
+            `"totalAmount" + ${event.dataValues.amount}`,
           ),
         },
         { where: { id: event.id }, transaction: t },
@@ -437,14 +442,20 @@ export class TransactionsService {
       const updatedRegistration = await this.registerModel.findByPk(
         registration.id,
       );
-      await this.sendRegistrationEmail(updatedRegistration, event);
+      await this.sendRegistrationEmail(updatedRegistration, event, req);
     } catch (error) {
-      console.error('Error completing registration:', error);
+      await t.rollback();
       throw error;
     }
   }
 
-  private async sendRegistrationEmail(registration, event) {
+  private async sendRegistrationEmail(registration, event, req?: Request) {
+    const baseUrl =
+      req?.headers.origin ||
+      process.env.FFRONTEND_BASE_URL ||
+      'https://ticxpress.com';
+
+    const eventUrl = `${baseUrl}/${event.dataValues.name.replace(' ', '').toLowerCase()}/dashboard`;
     const emailContent = eventRegistrationEmail(
       event.dataValues.id,
       event.dataValues.name,
@@ -453,6 +464,7 @@ export class TransactionsService {
       event.dataValues.description,
       registration.dataValues.fullName,
       registration.dataValues.accessCode,
+      eventUrl,
     );
 
     const emailResponse = await this.emailService.sendEmail(

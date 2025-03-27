@@ -18,46 +18,48 @@ import { InitializeTransactionDto } from './dto/create-transaction.dto';
 import { PaystackCallbackDto, PaystackWebhookDto } from './dto/paystack.dto';
 import { BadRequestException } from '../../common/exceptions';
 import { PAYSTACK_WEBHOOK_SIGNATURE_KEY } from '../global/constants';
+import { Request } from 'express';
 
 @Controller('api/v1/transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post('paystack/initialize')
-  async initializePaystackTransaction(@Body() dto: InitializeTransactionDto) {
-    return await this.transactionsService.initializePaystackTransaction(dto);
+  initializePaystackTransaction(@Body() dto: InitializeTransactionDto) {
+    return this.transactionsService.initializePaystackTransaction(dto);
   }
 
   @Get('paystack/callback')
-  async verifyPaystackTransaction(@Query() query: PaystackCallbackDto) {
-    return await this.transactionsService.verifyPaystackTransaction(query);
+  verifyPaystackTransaction(@Query() query: PaystackCallbackDto, @Req() req: Request) {
+    return this.transactionsService.verifyPaystackTransaction(query, req);
   }
 
   @Post('paystack/webhook')
   @HttpCode(HttpStatus.OK)
   async paystackPaymentWebhookHandler(
     @Body() dto: PaystackWebhookDto,
-    @Headers() headers = {},
+    @Headers() headers: Record<string, string>,
+    @Req() req: Request,
   ) {
+    const signature = headers?.[PAYSTACK_WEBHOOK_SIGNATURE_KEY] || '';
     const result = await this.transactionsService.handlePaystackWebhook(
       dto,
-      `${headers[PAYSTACK_WEBHOOK_SIGNATURE_KEY]}`,
+      signature,
+      req,
     );
 
-    if (!result) {
-      throw new BadRequestException('Invalid webhook request', '');
-    }
+    if (!result) throw new BadRequestException('Invalid webhook request', '');
   }
 
   @Post('coingate/initialize')
-  async initializeCoingateTransaction(@Body() dto: InitializeTransactionDto) {
-    return await this.transactionsService.initializeCoingateTransaction(dto);
+  initializeCoingateTransaction(@Body() dto: InitializeTransactionDto) {
+    return this.transactionsService.initializeCoingateTransaction(dto);
   }
 
   @Post('coingate/callback')
   @HttpCode(HttpStatus.OK)
-  async verifyCoingateTransaction(@Req() req, @Body() body) {
-    return await this.transactionsService.verifyCoingateTransaction(body);
+  verifyCoingateTransaction(@Req() req: Request, @Body() body) {
+    return this.transactionsService.verifyCoingateTransaction(req, body);
   }
 
   @Get()

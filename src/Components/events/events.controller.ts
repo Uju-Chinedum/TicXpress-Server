@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Req,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -18,8 +19,8 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  create(@Body() createEventDto: CreateEventDto) {
-    return this.eventsService.create(createEventDto);
+  create(@Body() createEventDto: CreateEventDto, @Req() req) {
+    return this.eventsService.create(createEventDto, req);
   }
 
   @Get()
@@ -28,8 +29,8 @@ export class EventsController {
   }
 
   @Get('organizer')
-  getStats(@Query('code') code: string) {
-    return this.eventsService.getDetails(code);
+  getStats(@Query('dashboardCode') dashboardCode: string) {
+    return this.eventsService.getDetails(dashboardCode);
   }
 
   @Get('organizer/registrations')
@@ -41,13 +42,16 @@ export class EventsController {
   }
 
   @Patch('organizer')
-  update(@Query('code') code: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(code, updateEventDto);
+  update(
+    @Query('dashboardCode') dashboardCode: string,
+    @Body() updateEventDto: UpdateEventDto,
+  ) {
+    return this.eventsService.update(dashboardCode, updateEventDto);
   }
 
   @Delete('organizer')
-  remove(@Query('code') code: string) {
-    return this.eventsService.remove(code);
+  remove(@Query('dashboardCode') dashboardCode: string) {
+    return this.eventsService.remove(dashboardCode);
   }
 
   @Get(':id')
