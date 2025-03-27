@@ -47,6 +47,10 @@ export class Event extends Model {
   @Column(DataType.STRING)
   public description: string;
 
+  @AllowNull(true)
+  @Column(DataType.STRING)
+  public imageUrl: string
+
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)

@@ -138,18 +138,18 @@ export class RegistrationsService {
         );
       }
 
-      const eventUrl = `${baseUrl}/events/${event.name.replace(' ', '').toLowerCase()}/dashboard`;
+      const eventUrl = `${baseUrl}/events/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
       const emailResponse = await this.emailService.sendEmail(
         email,
-        `Registration successful for ${event.name}`,
+        `Registration successful for ${event.dataValues.name}`,
         eventRegistrationEmail(
-          event.id,
-          event.name,
-          event.time.toISOString(),
-          event.location,
-          event.description,
+          event.dataValues.id,
+          event.dataValues.name,
+          event.dataValues.time.toISOString(),
+          event.dataValues.location,
+          event.dataValues.description,
           fullName,
-          registration.accessCode,
+          registration.dataValues.accessCode,
           eventUrl,
         ),
       );

@@ -45,11 +45,14 @@ export class CreateEventDto {
   description: string;
 
   @ApiProperty()
+  @IsString()
+  @IsOptional()
+  imageUrl?: string | null;
+
+  @ApiProperty()
   @IsNumber()
-  @IsNotEmpty({
-    message: 'What is your event capacity?',
-  })
-  capacity: number;
+  @IsOptional()
+  capacity?: number;
 
   @ApiProperty()
   @IsString()

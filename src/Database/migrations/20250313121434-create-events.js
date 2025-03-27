@@ -41,6 +41,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      capacity:{
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
       location: {
         type: Sequelize.STRING,
         allowNull: false,

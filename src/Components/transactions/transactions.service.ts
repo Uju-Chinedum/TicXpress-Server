@@ -455,7 +455,7 @@ export class TransactionsService {
       process.env.FFRONTEND_BASE_URL ||
       'https://ticxpress.com';
 
-    const eventUrl = `${baseUrl}/${event.dataValues.name.replace(' ', '').toLowerCase()}/dashboard`;
+    const eventUrl = `${baseUrl}/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
     const emailContent = eventRegistrationEmail(
       event.dataValues.id,
       event.dataValues.name,

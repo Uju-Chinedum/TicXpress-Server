@@ -8,19 +8,42 @@ import {
   Delete,
   Query,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { PaginationDto } from '../global/dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
+import { cloudinaryOptions } from './types';
 
 @Controller('api/v1/events')
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  create(@Body() createEventDto: CreateEventDto, @Req() req) {
-    return this.eventsService.create(createEventDto, req);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: new CloudinaryStorage({
+        cloudinary,
+        params: {
+          folder: 'ticxpress',
+          allowed_formats: ['jpg', 'jpeg', 'png'],
+        },
+      } as cloudinaryOptions),
+    }),
+  )
+  create(
+    @Body('data') data: string,
+    @UploadedFile() image: Express.Multer.File,
+    @Req() req,
+  ) {
+    const eventData: CreateEventDto = JSON.parse(data);
+    const imageUrl = image ? image.path : null;
+    return this.eventsService.create({ ...eventData, imageUrl }, req);
   }
 
   @Get()

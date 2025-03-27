@@ -31,6 +31,8 @@ export class EventsService {
     'organizer',
     'name',
     'description',
+    'imageUrl',
+    'capacity',
     'location',
     'time',
     'paid',
@@ -271,15 +273,29 @@ export class EventsService {
         where: { accessCode },
         attributes: this.attendeeAttributes,
       });
-      if (
-        !attendee ||
-        attendee.eventId !== event.id ||
-        attendee.status !== 'Approved' ||
-        attendee.verified
-      )
+
+      if (!attendee)
         throw new BadRequestException(
           'Invalid Access',
-          'Invalid or already verified attendee',
+          'Attendee not found',
+        );
+
+      if (attendee.dataValues.eventId !== event.id)
+        throw new BadRequestException(
+          'Invalid Access',
+          'Access to this event denied',
+        );
+
+      if (attendee.dataValues.status !== 'Approved')
+        throw new BadRequestException(
+          'Invalid Access',
+          'Approval to this event not granted',
+        );
+
+      if (attendee.dataValues.verified)
+        throw new BadRequestException(
+          'Invalid Access',
+          'Already verified for this event',
         );
 
       const [count, verified] = await this.registerModel.update(
