@@ -11,7 +11,7 @@ import { Event } from '../events/entities/event.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
 import { TransactionsService } from '../transactions/transactions.service';
 import { TransactionResponse, TransactionType } from '../transactions/types';
-import { RegistrationStatus } from './types';
+import { RegistrationResponseData, RegistrationStatus } from './types';
 import { EmailService, Utils } from '../utils';
 import { eventRegistrationEmail } from '../utils/templates/event-registration';
 import {
@@ -19,6 +19,8 @@ import {
   InternalServerException,
   NotFoundException,
 } from '../../common/exceptions';
+import { AppResponse } from '../global/types';
+import { successResponse } from '../utils/app';
 
 @Injectable()
 export class RegistrationsService {
@@ -50,7 +52,7 @@ export class RegistrationsService {
     );
   }
 
-  async create(registrationBody: CreateRegistrationDto, req: Request) {
+  async create(registrationBody: CreateRegistrationDto, req: Request): Promise<AppResponse<RegistrationResponseData>> {
     if (!registrationBody) {
       throw new BadRequestException(
         'Missing data',
@@ -102,6 +104,24 @@ export class RegistrationsService {
         { transaction },
       );
 
+      const responseData: RegistrationResponseData = {
+        id: registration.dataValues.id,
+        fullName: registration.dataValues.fullName,
+        email: registration.dataValues.email,
+        phoneNumber: registration.dataValues.phoneNumber,
+        accessCode: registration.dataValues.accessCode,
+        createdAt: registration.dataValues.createdAt,
+        event: {
+          id: event.dataValues.id,
+          organizer: event.dataValues.organizer,
+          name: event.dataValues.name,
+          description: event.dataValues.description,
+          location: event.dataValues.location,
+          time: event.dataValues.time,
+        },
+        paymentLink: undefined,
+      };
+
       if (isPaidEvent) {
         if (!type) {
           throw new BadRequestException(
@@ -111,30 +131,32 @@ export class RegistrationsService {
         }
 
         const initializeTrx = this.getTransactionInitializer(type);
-        const trxResult: TransactionResponse = await initializeTrx({
-          eventId,
-          fullName,
-          email,
-          phoneNumber,
-        });
+        const appResponse: AppResponse<TransactionResponse> =
+          await initializeTrx({
+            eventId,
+            fullName,
+            email,
+            phoneNumber,
+          });
+
+        const trxResult: TransactionResponse = appResponse.data;
 
         await this.trxModel.update(
           { registrationId, registrationCompleted: false },
-          { where: { id: trxResult.data.id }, transaction },
+          { where: { id: trxResult.id }, transaction },
         );
 
         await this.registerModel.update(
-          { transactionId: trxResult.data.id },
+          { transactionId: trxResult.id },
           { where: { id: registrationId }, transaction },
         );
 
         await transaction.commit();
-        return this.buildResponse(
-          HttpStatus.CREATED,
+        responseData.paymentLink = trxResult.paymentLink;
+        return successResponse(
           'Registration Pending. Please proceed with payment',
-          registration,
-          event,
-          trxResult.data.paymentLink,
+          responseData,
+          HttpStatus.CREATED,
         );
       }
 
@@ -177,47 +199,15 @@ export class RegistrationsService {
       );
 
       await transaction.commit();
-      return this.buildResponse(
-        HttpStatus.CREATED,
+      return successResponse(
         'Registration successful',
-        registration,
-        event,
+        responseData,
+        HttpStatus.CREATED,
       );
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
-  }
-
-  private buildResponse(
-    status: number,
-    message: string,
-    registration: Registration,
-    event: Event,
-    paymentLink?: string,
-  ) {
-    return {
-      success: true,
-      statusCode: status,
-      message,
-      data: {
-        id: registration.dataValues.id,
-        fullName: registration.dataValues.fullName,
-        email: registration.dataValues.email,
-        phoneNumber: registration.dataValues.phoneNumber,
-        accessCode: registration.dataValues.accessCode,
-        createdAt: registration.dataValues.createdAt,
-        event: {
-          id: event.dataValues.id,
-          organizer: event.dataValues.organizer,
-          name: event.dataValues.name,
-          description: event.dataValues.description,
-          location: event.dataValues.location,
-          time: event.dataValues.time,
-        },
-        paymentLink,
-      },
-    };
   }
 
   async findAll() {

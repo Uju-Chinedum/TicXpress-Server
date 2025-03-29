@@ -16,6 +16,8 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '../../common/exceptions';
+import { AppResponse, PaginatedResponse } from '../global/types';
+import { successResponse } from '../utils/app';
 
 @Injectable()
 export class EventsService {
@@ -99,7 +101,10 @@ export class EventsService {
     return event;
   }
 
-  async create(eventBody: CreateEventDto, req: Request) {
+  async create(
+    eventBody: CreateEventDto,
+    req: Request,
+  ): Promise<AppResponse<Partial<Event>>> {
     if (!eventBody)
       throw new BadRequestException(
         'Missing Details',
@@ -150,24 +155,25 @@ export class EventsService {
       }
 
       await transaction.commit();
-      return {
-        success: true,
-        statusCode: HttpStatus.CREATED,
-        message: 'Event created successfully. Check your email for details.',
-        data: Object.fromEntries(
+      return successResponse(
+        'Event created successfully. Check your email for details.',
+        Object.fromEntries(
           this.eventAttributes.map((key) => [
             key,
             event.get({ plain: true })[key],
           ]),
         ),
-      };
+        HttpStatus.CREATED,
+      );
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
   }
 
-  async findAll(dto: PaginationDto) {
+  async findAll(
+    dto: PaginationDto,
+  ): Promise<AppResponse<PaginatedResponse<Event>>> {
     try {
       const { page = 1, limit = 10 } = dto;
       const skip = Utils.calcSkip(page, limit);
@@ -179,29 +185,24 @@ export class EventsService {
         order: [['updatedAt', 'DESC']],
       });
 
-      return {
-        success: true,
-        statusCode: HttpStatus.OK,
-        message: 'Fetched all events',
-        data: Utils.paginateResponse([events.rows, events.count], page, limit),
-      };
+      return successResponse(
+        'Fetched All Events',
+        Utils.paginateResponse([events.rows, events.count], page, limit),
+      );
     } catch (error) {
       throw error;
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: string): Promise<AppResponse<Partial<Event>>> {
     const event = await this.findEventById(id);
 
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Fetched event',
-      data: event,
-    };
+    return successResponse('Fetched event', event);
   }
 
-  async getDetails(dashboardCode: string) {
+  async getDetails(
+    dashboardCode: string,
+  ): Promise<AppResponse<Partial<Event>>> {
     if (!dashboardCode)
       throw new UnauthorizedException(
         'Permission Denied',
@@ -210,15 +211,13 @@ export class EventsService {
 
     const event = await this.findEventByDashboardCode(dashboardCode);
 
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Fetched event details',
-      data: event,
-    };
+    return successResponse('Fetched event details', event);
   }
 
-  async update(dashboardCode: string, updateEventDto: UpdateEventDto) {
+  async update(
+    dashboardCode: string,
+    updateEventDto: UpdateEventDto,
+  ): Promise<AppResponse<Partial<Event>>> {
     if (!dashboardCode)
       throw new UnauthorizedException(
         'Permission Denied',
@@ -235,15 +234,10 @@ export class EventsService {
         `No event found with dashboard code: ${dashboardCode}`,
       );
 
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Event updated',
-      data: event[0],
-    };
+    return successResponse('Event Updated', event[0]);
   }
 
-  async remove(dashboardCode: string) {
+  async remove(dashboardCode: string): Promise<AppResponse<{}>> {
     if (!dashboardCode)
       throw new UnauthorizedException(
         'Permission Denied',
@@ -257,15 +251,13 @@ export class EventsService {
         `No event found with dashboard code: ${dashboardCode}`,
       );
 
-    return {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Event deleted',
-      data: {},
-    };
+    return successResponse('Event Deleted', {});
   }
 
-  async verifyAttendee(dashboardCode: string, accessCode: string) {
+  async verifyAttendee(
+    dashboardCode: string,
+    accessCode: string,
+  ): Promise<AppResponse<Partial<Registration>>> {
     if (!dashboardCode)
       throw new UnauthorizedException(
         'Permission Denied',
@@ -317,12 +309,7 @@ export class EventsService {
       );
 
       await transaction.commit();
-      return {
-        success: true,
-        statusCode: HttpStatus.OK,
-        message: 'Attendee verified',
-        data: verified[0],
-      };
+      return successResponse('Attendee Verified', verified[0]);
     } catch (error) {
       await transaction.rollback();
       throw error;

@@ -7,6 +7,7 @@ import {
 import axios from 'axios';
 import { randomInt } from 'crypto';
 import * as QRCode from 'qrcode';
+import { PaginatedResponse } from '../global/types';
 
 export class Utils {
   static generateDashboardCode(): string {
@@ -17,7 +18,7 @@ export class Utils {
     data: [T[], number],
     page: number,
     take: number,
-  ) {
+  ): PaginatedResponse<T> {
     const [result, total] = data;
     const lastPage = Math.ceil(total / take);
     const nextPage = page + 1 > lastPage ? null : page + 1;

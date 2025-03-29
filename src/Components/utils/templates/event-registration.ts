@@ -100,6 +100,7 @@ export const eventRegistrationEmail = (
             </div>
             
             <a href="${eventUrl}" class="cta-button">View Event Details</a>
+            <p>Or scan the attached QR code</p>
             <p>If you have any questions, feel free to contact us.</p>
         </div>
         <div class="footer">© 2025 TicXpress | All rights reserved.</div>

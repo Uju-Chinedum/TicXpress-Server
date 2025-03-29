@@ -15,6 +15,8 @@ import {
   ValidationError,
 } from 'sequelize';
 import { GlobalService } from 'src/Components/global/global.service';
+import { ErrorData } from 'src/Components/global/types';
+import { errorResponse } from 'src/Components/utils/app';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -83,14 +85,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       context: context[1],
     });
 
-    response.status(status).json({
-      success: false,
-      statusCode: status,
-      data: {
-        name,
-        message,
-        timestamp: new Date().toISOString(),
-      },
-    });
+    const errorData: ErrorData = {
+      name,
+      message,
+      timestamp: new Date().toISOString(),
+    };
+    const error = errorResponse(errorData, status)
+
+    response.status(status).json(error);
   }
 }

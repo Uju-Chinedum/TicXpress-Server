@@ -1,6 +1,6 @@
 import { Event } from '../../events/entities/event.entity';
 
-export const eventCreationEmail = (event: Event, eventUrl: string) => {
+export const eventCreationEmail = (event: Event, eventUrl: string): string => {
   const {
     name,
     organizer,
@@ -117,6 +117,7 @@ export const eventCreationEmail = (event: Event, eventUrl: string) => {
               </div>
               
               <a href="${eventUrl}" class="cta-button">View Event Dashboard</a>
+              <p>Or scan the attached QR code</p>
               <p>If you have any questions, feel free to contact us.</p>
           </div>
           <div class="footer">© 2025 TicXpress | All rights reserved.</div>
