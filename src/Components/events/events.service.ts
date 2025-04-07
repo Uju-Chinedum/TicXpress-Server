@@ -41,8 +41,6 @@ export class EventsService {
     'amount',
     'cryptoAmount',
     'currency',
-    'cryptoCurrency',
-    'cryptoSymbol',
     'updatedAt',
   ];
 
@@ -118,11 +116,11 @@ export class EventsService {
       'https://ticxpress.com';
 
     try {
-      const { name, email, amount, currency, cryptoCurrency } = eventBody;
+      const { name, email, amount, currency } = eventBody;
       const dashboardCode = Utils.generateDashboardCode();
       const cryptoAmount =
-        amount && currency && cryptoCurrency
-          ? await Utils.fiatToCrypto(amount, currency, cryptoCurrency)
+        amount && currency
+          ? await Utils.fiatToCrypto(amount, currency)
           : undefined;
 
       const event = await this.eventModel.create(

@@ -167,7 +167,6 @@ export class RegistrationsService {
         email,
         `Registration successful for ${event.dataValues.name}`,
         eventRegistrationEmail(
-          event.dataValues.id,
           event.dataValues.name,
           event.dataValues.time.toISOString(),
           event.dataValues.location,

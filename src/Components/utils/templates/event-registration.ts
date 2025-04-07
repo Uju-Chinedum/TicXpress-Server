@@ -1,5 +1,4 @@
 export const eventRegistrationEmail = (
-  eventId: string,
   eventName: string,
   eventTime: string,
   eventLocation: string,

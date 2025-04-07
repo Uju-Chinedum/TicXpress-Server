@@ -1,0 +1,1265 @@
+{
+	"info": {
+		"_postman_id": "092cceef-6366-416c-8265-15efad4800f6",
+		"name": "TicXpress",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "28144776"
+	},
+	"item": [
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": "/C:/Users/KHAY/Downloads/image (7).jpeg"
+								},
+								{
+									"key": "data",
+									"value": "{\"organizer\": \"Savadow\", \"name\": \"The Trinity Launch\", \"email\": \"dev.nedum@gmail.com\", \"description\": \"Launch Day for The Trinity\", \"capacity\": 300, \"location\": \"Boston\", \"time\": \"2025-03-13T20:35:36.880Z\", \"paid\": true, \"amount\": 200000, \"currency\": \"NGN\", \"cryptoCurrency\": \"Ethereum\", \"cryptoSymbol\": \"ETH\"}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/events",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Free Event",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "/C:/Users/KHAY/Downloads/image (10).jpeg"
+										},
+										{
+											"key": "data",
+											"value": "{\"organizer\": \"TicXpress\", \"name\": \"TicXpress Launch\", \"email\": \"dev.nedum@gmail.com\",  \"description\": \"Launch Day\", \"capacity\": 20, \"location\": \"PH\", \"time\": \"2025-03-13T20:35:36.880Z\"}",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/events",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "551"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"227-UPXSh8pe52uWg8pHJsYXOixaJTU\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:11:21 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Event created successfully. Check your email for details.\",\n    \"data\": {\n        \"id\": \"0195d971-d8cf-74b0-ac69-b66cbc106ec3\",\n        \"organizer\": \"TicXpress\",\n        \"name\": \"TicXpress Launch\",\n        \"description\": \"Launch Day\",\n        \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743109863/ticxpress/e1ujjqcl1ymymlu0gucx.jpg\",\n        \"capacity\": 20,\n        \"location\": \"PH\",\n        \"time\": \"2025-03-13T20:35:36.880Z\",\n        \"paid\": false,\n        \"amount\": null,\n        \"cryptoAmount\": null,\n        \"currency\": null,\n        \"cryptoCurrency\": null,\n        \"cryptoSymbol\": null,\n        \"updatedAt\": \"2025-03-27T21:11:11.909Z\"\n    }\n}"
+						},
+						{
+							"name": "Create Paid Event",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "image",
+											"type": "file",
+											"src": "/C:/Users/KHAY/Downloads/image (10).jpeg"
+										},
+										{
+											"key": "data",
+											"value": "{\"organizer\": \"Savadow\", \"name\": \"The Trinity Launch\", \"email\": \"dev.nedum@gmail.com\", \"description\": \"Launch Day for The Trinity\", \"capacity\": 300, \"location\": \"Boston\", \"time\": \"2025-03-13T20:35:36.880Z\", \"paid\": true, \"amount\": 200000, \"currency\": \"NGN\", \"cryptoCurrency\": \"Ethereum\", \"cryptoSymbol\": \"ETH\"}",
+											"type": "text"
+										}
+									],
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/events",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "589"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"24d-cnKgx317/rpeK+lMj8V3CKAhrrg\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:14:27 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Event created successfully. Check your email for details.\",\n    \"data\": {\n        \"id\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\n        \"organizer\": \"Savadow\",\n        \"name\": \"The Trinity Launch\",\n        \"description\": \"Launch Day for The Trinity\",\n        \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743110050/ticxpress/kqbb96ues1xqpyqhgf3v.jpg\",\n        \"capacity\": 300,\n        \"location\": \"Boston\",\n        \"time\": \"2025-03-13T20:35:36.880Z\",\n        \"paid\": true,\n        \"amount\": 200000,\n        \"cryptoAmount\": \"0.06488600\",\n        \"currency\": \"NGN\",\n        \"cryptoCurrency\": \"Ethereum\",\n        \"cryptoSymbol\": \"ETH\",\n        \"updatedAt\": \"2025-03-27T21:14:22.535Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Events",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/events",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Events",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/api/v1/events",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1089"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"441-0LJFc3uBJy3Xr9v8K6Q6PeCMHuo\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:15:13 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Fetched all events\",\n    \"data\": {\n        \"results\": [\n            {\n                \"id\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\n                \"organizer\": \"Savadow\",\n                \"name\": \"The Trinity Launch\",\n                \"description\": \"Launch Day for The Trinity\",\n                \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743110050/ticxpress/kqbb96ues1xqpyqhgf3v.jpg\",\n                \"capacity\": 300,\n                \"location\": \"Boston\",\n                \"time\": \"2025-03-13T20:35:36.880Z\",\n                \"paid\": true,\n                \"amount\": 200000,\n                \"cryptoAmount\": \"0.06488600\",\n                \"currency\": \"NGN\",\n                \"cryptoCurrency\": \"Ethereum\",\n                \"cryptoSymbol\": \"ETH\",\n                \"updatedAt\": \"2025-03-27T21:14:22.535Z\"\n            },\n            {\n                \"id\": \"0195d971-d8cf-74b0-ac69-b66cbc106ec3\",\n                \"organizer\": \"TicXpress\",\n                \"name\": \"TicXpress Launch\",\n                \"description\": \"Launch Day\",\n                \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743109863/ticxpress/e1ujjqcl1ymymlu0gucx.jpg\",\n                \"capacity\": 20,\n                \"location\": \"PH\",\n                \"time\": \"2025-03-13T20:35:36.880Z\",\n                \"paid\": false,\n                \"amount\": null,\n                \"cryptoAmount\": null,\n                \"currency\": null,\n                \"cryptoCurrency\": null,\n                \"cryptoSymbol\": null,\n                \"updatedAt\": \"2025-03-27T21:11:11.909Z\"\n            }\n        ],\n        \"pageData\": {\n            \"total\": 2,\n            \"currentPage\": 1,\n            \"nextPage\": null,\n            \"prevPage\": null,\n            \"lastPage\": 1\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/events/0195d971-d8cf-74b0-ac69-b66cbc106ec3",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"0195d971-d8cf-74b0-ac69-b66cbc106ec3"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Event",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/api/v1/events/0195d971-d8cf-74b0-ac69-b66cbc106ec3",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"0195d971-d8cf-74b0-ac69-b66cbc106ec3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "507"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1fb-ezJZ5c8NR8pPTF4Oj2YFsT6KJQ4\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:16:15 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Fetched event\",\n    \"data\": {\n        \"id\": \"0195d971-d8cf-74b0-ac69-b66cbc106ec3\",\n        \"organizer\": \"TicXpress\",\n        \"name\": \"TicXpress Launch\",\n        \"description\": \"Launch Day\",\n        \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743109863/ticxpress/e1ujjqcl1ymymlu0gucx.jpg\",\n        \"capacity\": 20,\n        \"location\": \"PH\",\n        \"time\": \"2025-03-13T20:35:36.880Z\",\n        \"paid\": false,\n        \"amount\": null,\n        \"cryptoAmount\": null,\n        \"currency\": null,\n        \"cryptoCurrency\": null,\n        \"cryptoSymbol\": null,\n        \"updatedAt\": \"2025-03-27T21:11:11.909Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/api/v1/events/organizer?dashboardCode=38gUM23n",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"organizer"
+							],
+							"query": [
+								{
+									"key": "dashboardCode",
+									"value": "38gUM23n"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get Details",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/api/v1/events/organizer?dashboardCode=38gUM23n",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"organizer"
+									],
+									"query": [
+										{
+											"key": "dashboardCode",
+											"value": "38gUM23n"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "619"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"26b-BG7eMAL4QTzhpQpqQ5soqPiFa28\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 22:12:45 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Fetched event details\",\n    \"data\": {\n        \"id\": \"0195d9a8-b42e-7441-a194-7133c8170915\",\n        \"organizer\": \"Savadow\",\n        \"name\": \"Something\",\n        \"description\": \"Launch Day for The Trinity\",\n        \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743113457/ticxpress/syaxsj4ztqpzv0mm7cy5.jpg\",\n        \"capacity\": 0,\n        \"location\": \"Boston\",\n        \"time\": \"2025-03-13T20:35:36.880Z\",\n        \"paid\": false,\n        \"amount\": null,\n        \"cryptoAmount\": null,\n        \"currency\": null,\n        \"cryptoCurrency\": null,\n        \"cryptoSymbol\": null,\n        \"updatedAt\": \"2025-03-27T22:11:07.017Z\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": null,\n        \"active\": true,\n        \"registered\": 0,\n        \"totalAmount\": 0\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"active\": false,\r\n    \"capacity\": 40\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/events/organizer?dashboardCode=38gUM23n",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"organizer"
+							],
+							"query": [
+								{
+									"key": "dashboardCode",
+									"value": "38gUM23n"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update Event",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"active\": false,\r\n    \"capacity\": 40\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/events/organizer?dashboardCode=38gUM23n",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"organizer"
+									],
+									"query": [
+										{
+											"key": "dashboardCode",
+											"value": "38gUM23n"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "692"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"2b4-fqPp2EEJf0581vPQE8bmIEKpCBQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 22:15:02 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Event updated\",\n    \"data\": {\n        \"id\": \"0195d9a8-b42e-7441-a194-7133c8170915\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": null,\n        \"organizer\": \"Savadow\",\n        \"name\": \"Something\",\n        \"description\": \"Launch Day for The Trinity\",\n        \"imageUrl\": \"https://res.cloudinary.com/dy0prfjrl/image/upload/v1743113457/ticxpress/syaxsj4ztqpzv0mm7cy5.jpg\",\n        \"capacity\": 40,\n        \"location\": \"Boston\",\n        \"time\": \"2025-03-13T20:35:36.880Z\",\n        \"paid\": false,\n        \"amount\": null,\n        \"cryptoAmount\": null,\n        \"currency\": null,\n        \"cryptoCurrency\": null,\n        \"cryptoSymbol\": null,\n        \"dashboardCode\": \"38gUM23n\",\n        \"active\": false,\n        \"registered\": 0,\n        \"totalAmount\": 0,\n        \"attended\": 0,\n        \"createdAt\": \"2025-03-27T22:11:07.017Z\",\n        \"updatedAt\": \"2025-03-27T22:14:59.565Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/events/organizer?dashboardCode=38gUM23n",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"organizer"
+							],
+							"query": [
+								{
+									"key": "dashboardCode",
+									"value": "38gUM23n"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete Event",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/events/organizer/3PhRm3",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"organizer",
+										"3PhRm3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "82"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"52-Gfiofw/gOwvLy1S8wF4LEteTXSg\""
+								},
+								{
+									"key": "Date",
+									"value": "Tue, 18 Mar 2025 15:11:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Deleted event successfully\",\n    \"data\": {}\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify Attendee",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"accessCode\": \"570725\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/events/organizer/registrations?dashboardCode=lVpMd4NP",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"events",
+								"organizer",
+								"registrations"
+							],
+							"query": [
+								{
+									"key": "dashboardCode",
+									"value": "lVpMd4NP"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Verify Attendee",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"accessCode\": \"570725\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/events/organizer/registrations?dashboardCode=lVpMd4NP",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"events",
+										"organizer",
+										"registrations"
+									],
+									"query": [
+										{
+											"key": "dashboardCode",
+											"value": "lVpMd4NP"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "346"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"15a-9TJzdSTe7rAPjwhlHyuYvFj+QgM\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 22:30:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 200,\n    \"message\": \"Attendee verified\",\n    \"data\": {\n        \"id\": \"0195d99f-0b0e-743d-9017-6b00c9e0753c\",\n        \"fullName\": \"Uju Chinedum\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": \"08026718076\",\n        \"eventId\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\n        \"status\": \"Approved\",\n        \"accessCode\": \"570725\",\n        \"verified\": true,\n        \"updatedAt\": \"2025-03-27T22:30:31.946Z\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "Paystack Transaction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\r\n    \"fullName\": \"Nedum\",\r\n    \"email\": \"feudxxx@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/transactions/paystack/initialize",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"paystack",
+								"initialize"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Paystack Transaction",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\r\n    \"fullName\": \"Nedum\",\r\n    \"email\": \"feudxxx@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/transactions/paystack/initialize",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"transactions",
+										"paystack",
+										"initialize"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "371"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"173-E80KF4Khq67Ecjs0xWPVgSQYt8k\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 21 Mar 2025 12:53:40 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Transaction in progress\",\n    \"data\": {\n        \"fullName\": \"Nedum\",\n        \"email\": \"feudxxx@gmail.com\",\n        \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\n        \"amount\": 50000,\n        \"currency\": \"NGN\",\n        \"transactionReference\": \"TicX-db51bb6f8c87KE6XKIX5620322\",\n        \"type\": \"Card\",\n        \"gatewayReference\": \"6nyup2d2i9\",\n        \"paymentLink\": \"https://checkout.paystack.com/novbgar1jdbw0fr\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Coingate Transaction",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\r\n    \"fullName\": \"Nedum\",\r\n    \"email\": \"feudxxx@gmail.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/transactions/coingate/initialize",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"transactions",
+								"coingate",
+								"initialize"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Coingate Transaction",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\r\n    \"fullName\": \"Nedum\",\r\n    \"email\": \"feudxxx@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/transactions/coingate/initialize",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"transactions",
+										"coingate",
+										"initialize"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "408"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"198-qCKS1d9MJ3YA5gUAln/bbmPUHjA\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 21 Mar 2025 12:55:20 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Transaction in progress\",\n    \"data\": {\n        \"fullName\": \"Nedum\",\n        \"email\": \"feudxxx@gmail.com\",\n        \"eventId\": \"0195b8c1-df46-7fc7-9bdd-1eab70775d7d\",\n        \"amount\": \"0.00038987\",\n        \"currency\": \"BTC\",\n        \"transactionReference\": \"TicX-7740f3d1111fORDCV596719259\",\n        \"type\": \"Crypto\",\n        \"gatewayReference\": \"222435\",\n        \"paymentLink\": \"https://pay-sandbox.coingate.com/invoice/63af886e-693a-47a8-88aa-8299f5b64c26\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Registrations",
+			"item": [
+				{
+					"name": "Register for Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"fullName\": \"Uju Chinedum\",\r\n    \"email\": \"dev.nedum@gmail.com\",\r\n    \"phoneNumber\": \"08026718076\",\r\n    \"eventId\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\r\n    \"type\": \"Crypto\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/api/v1/registrations",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"registrations"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register for Free Event",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fullName\": \"Uju Chinedum\",\r\n    \"email\": \"dev.nedum@gmail.com\",\r\n    \"phoneNumber\": \"08026718076\",\r\n    \"eventId\": \"0195d971-d8cf-74b0-ac69-b66cbc106ec3\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/registrations",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"registrations"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "448"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1c0-QpZUVNPVEm1kY9VImWYgrtXmluE\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:29:43 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Registration successful\",\n    \"data\": {\n        \"id\": \"0195d982-ab4d-7617-99b3-9852ed826c34\",\n        \"fullName\": \"Uju Chinedum\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": \"08026718076\",\n        \"accessCode\": \"978798\",\n        \"createdAt\": \"2025-03-27T21:29:34.289Z\",\n        \"event\": {\n            \"id\": \"0195d971-d8cf-74b0-ac69-b66cbc106ec3\",\n            \"organizer\": \"TicXpress\",\n            \"name\": \"TicXpress Launch\",\n            \"description\": \"Launch Day\",\n            \"location\": \"PH\",\n            \"time\": \"2025-03-13T20:35:36.880Z\"\n        }\n    }\n}"
+						},
+						{
+							"name": "Register for Card Event",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fullName\": \"Uju Chinedum\",\r\n    \"email\": \"dev.nedum@gmail.com\",\r\n    \"phoneNumber\": \"08026718076\",\r\n    \"eventId\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\r\n    \"type\": \"Card\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/registrations",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"registrations"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "552"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"228-X4GDQHrTLSCIO6QDHiIuKcOJNQ0\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 21:32:50 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Registration Pending. Please proceed with payment\",\n    \"data\": {\n        \"id\": \"0195d985-7ac5-7b23-89ca-2d0e041eae01\",\n        \"fullName\": \"Uju Chinedum\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": \"08026718076\",\n        \"accessCode\": null,\n        \"createdAt\": \"2025-03-27T21:32:38.470Z\",\n        \"event\": {\n            \"id\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\n            \"organizer\": \"Savadow\",\n            \"name\": \"The Trinity Launch\",\n            \"description\": \"Launch Day for The Trinity\",\n            \"location\": \"Boston\",\n            \"time\": \"2025-03-13T20:35:36.880Z\"\n        },\n        \"paymentLink\": \"https://checkout.paystack.com/dxm7xxcqwx6wcdo\"\n    }\n}"
+						},
+						{
+							"name": "Register for Crypto Event",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"fullName\": \"Uju Chinedum\",\r\n    \"email\": \"dev.nedum@gmail.com\",\r\n    \"phoneNumber\": \"08026718076\",\r\n    \"eventId\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\r\n    \"type\": \"Crypto\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/api/v1/registrations",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"api",
+										"v1",
+										"registrations"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Access-Control-Allow-Origin",
+									"value": "*"
+								},
+								{
+									"key": "Access-Control-Allow-Credentials",
+									"value": "true"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "584"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"248-oaMsXNNy4Ulnr9P6cfOi5MvPIaE\""
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 27 Mar 2025 22:00:40 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"statusCode\": 201,\n    \"message\": \"Registration Pending. Please proceed with payment\",\n    \"data\": {\n        \"id\": \"0195d99f-0b0e-743d-9017-6b00c9e0753c\",\n        \"fullName\": \"Uju Chinedum\",\n        \"email\": \"dev.nedum@gmail.com\",\n        \"phoneNumber\": \"08026718076\",\n        \"accessCode\": null,\n        \"createdAt\": \"2025-03-27T22:00:33.809Z\",\n        \"event\": {\n            \"id\": \"0195d974-c1c6-78f8-a06b-209a6302ed70\",\n            \"organizer\": \"Savadow\",\n            \"name\": \"The Trinity Launch\",\n            \"description\": \"Launch Day for The Trinity\",\n            \"location\": \"Boston\",\n            \"time\": \"2025-03-13T20:35:36.880Z\"\n        },\n        \"paymentLink\": \"https://pay-sandbox.coingate.com/invoice/c9df44a6-80af-49bd-bb26-b4b6a8b87b1e\"\n    }\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

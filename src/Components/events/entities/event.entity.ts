@@ -11,7 +11,7 @@ import {
   Default,
   HasMany,
 } from 'sequelize-typescript';
-import { Transaction } from 'src/Components/transactions/entities/transaction.entity';
+import { Transaction } from '../../transactions/entities/transaction.entity';
 
 @Table({
   tableName: 'events',

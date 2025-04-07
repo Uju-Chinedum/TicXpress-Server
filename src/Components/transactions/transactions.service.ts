@@ -161,7 +161,6 @@ export class TransactionsService {
 
     const eventUrl = `${baseUrl}/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
     const emailContent = eventRegistrationEmail(
-      event.dataValues.id,
       event.dataValues.name,
       event.dataValues.time,
       event.dataValues.location,
