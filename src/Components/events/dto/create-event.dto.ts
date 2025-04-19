@@ -6,9 +6,11 @@ import {
   IsOptional,
   IsNotEmpty,
   IsNumber,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { TicketDto } from './ticket.dto';
 
 export class CreateEventDto {
   @ApiProperty()
@@ -75,11 +77,7 @@ export class CreateEventDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @IsNumber()
-  amount?: number;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  currency?: string;
+  @ValidateNested({each: true})
+  @Type(() => TicketDto)
+  tickets?: TicketDto[];
 }

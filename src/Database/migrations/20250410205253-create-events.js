@@ -1,17 +1,15 @@
 'use strict';
 
-const { type } = require('os');
+/** @type {import('sequelize-cli').Migration} */
 const { v7: uuidv7 } = require('uuidv7');
-
 module.exports = {
-  /**
-   * Add altering commands here.
-   *
-   * Example:
-   * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
-   */
-
-  up: async (queryInterface, Sequelize) => {
+  async up (queryInterface, Sequelize) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
     await queryInterface.createTable('events', {
       id: {
         type: Sequelize.UUID,
@@ -41,10 +39,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      capacity:{
+      capacity: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 0,
       },
       location: {
         type: Sequelize.STRING,
@@ -102,14 +100,13 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
+  async down (queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
      * Example:
      * await queryInterface.dropTable('users');
      */
-
     await queryInterface.dropTable('events');
-  },
+  }
 };

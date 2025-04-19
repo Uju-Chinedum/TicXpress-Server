@@ -1,10 +1,9 @@
 'use strict';
 
-const { v7: uuidv7 } = require('uuidv7');
-
 /** @type {import('sequelize-cli').Migration} */
+const { v7: uuidv7 } = require('uuidv7');
 module.exports = {
-  async up(queryInterface, Sequelize) {
+  async up (queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
@@ -87,7 +86,7 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down (queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
@@ -99,5 +98,5 @@ module.exports = {
     await queryInterface.removeColumn('transactions', 'registrationId');
 
     await queryInterface.removeColumn('transactions', 'registrationCompleted');
-  },
+  }
 };

@@ -12,6 +12,7 @@ import {
   HasMany,
 } from 'sequelize-typescript';
 import { Transaction } from '../../transactions/entities/transaction.entity';
+import { Ticket } from './ticket.entity';
 
 @Table({
   tableName: 'events',
@@ -52,11 +53,6 @@ export class Event extends Model {
   public imageUrl: string
 
   @AllowNull(false)
-  @Default(0)
-  @Column(DataType.INTEGER)
-  public capacity: number;
-
-  @AllowNull(false)
   @Column(DataType.STRING)
   public location: string;
 
@@ -68,26 +64,6 @@ export class Event extends Model {
   @Default(false)
   @Column(DataType.BOOLEAN)
   public paid: boolean;
-
-  @AllowNull(true)
-  @Column(DataType.INTEGER)
-  public amount: number;
-
-  @AllowNull(true)
-  @Column(DataType.DECIMAL(20, 8))
-  public cryptoAmount: number;
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  public currency: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  public cryptoCurrency: string;
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  public cryptoSymbol: string;
 
   @Unique
   @AllowNull(false)
@@ -129,4 +105,10 @@ export class Event extends Model {
     hooks: true,
   })
   transactions: Transaction;
+
+  @HasMany(() => Ticket, {
+    as: 'tickets',
+    hooks: true,
+  })
+  tickets: Ticket[];
 }

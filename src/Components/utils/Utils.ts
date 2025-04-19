@@ -65,7 +65,7 @@ export class Utils {
         },
       );
 
-      const rate: number = response.data['usdc'][fiat.toLowerCase()];
+      const rate: number = response.data['usd-coin'][fiat.toLowerCase()];
       return amount / rate;
     } catch (error) {
       throw error;
