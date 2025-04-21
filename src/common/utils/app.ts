@@ -1,5 +1,5 @@
 import { HttpStatus } from '@nestjs/common';
-import { AppResponse, ErrorData } from '../global/types';
+import { AppResponse, ErrorData } from '../../Components/global/types';
 
 export const successResponse = <T extends object | null>(
   message: string,

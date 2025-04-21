@@ -1,13 +1,14 @@
 import * as randomstring from 'randomstring';
 import { uuidv7 } from 'uuidv7';
-import {
-  COINGECKO_BASE_PRICE_URL,
-  COINGECKO_LIST_URL,
-} from '../global/constants';
 import axios from 'axios';
 import { randomInt } from 'crypto';
 import * as QRCode from 'qrcode';
-import { PaginatedResponse } from '../global/types';
+import slugify from 'slugify';
+
+import { COINGECKO_BASE_PRICE_URL } from '../../Components/global/constants';
+import { PaginatedResponse } from '../../Components/global/types';
+import { GenerateEventUrlOptions, SendSuccessEmailOptions } from '../types';
+import { InternalServerException } from '../exceptions';
 
 export class Utils {
   static generateDashboardCode(): string {
@@ -65,7 +66,7 @@ export class Utils {
         },
       );
 
-      const rate: number = response.data['usdc'][fiat.toLowerCase()];
+      const rate: number = response.data['usd-coin'][fiat.toLowerCase()];
       return amount / rate;
     } catch (error) {
       throw error;
@@ -78,5 +79,52 @@ export class Utils {
 
   static async generateQRCode(eventUrl: string): Promise<Buffer> {
     return await QRCode.toBuffer(eventUrl);
+  }
+
+  static generateEventUrl(
+    eventName: string,
+    options?: GenerateEventUrlOptions,
+  ): string {
+    const baseUrl =
+      options?.overrideBaseUrl ||
+      options?.req?.headers.origin ||
+      process.env.FRONTEND_BASE_URL ||
+      'https://ticxpress.com';
+
+    const slug = slugify(eventName, { lower: true, strict: true }); // removes special chars & converts to lowercase
+    const prefix = options?.includeEventsPrefix === false ? '' : 'events/';
+    const suffix = options?.includeDashboardSuffix === true ? '/dashboard' : '';
+
+    return `${baseUrl}/${prefix}${slug}${suffix}`;
+  }
+
+  static async sendSuccessEmail({
+    emailService,
+    email,
+    subject,
+    htmlTemplate,
+    eventUrl,
+  }: SendSuccessEmailOptions): Promise<void> {
+    const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
+
+    const emailResponse = await emailService.sendEmail(
+      email,
+      subject,
+      htmlTemplate,
+      [
+        {
+          filename: 'event_qrcode.png',
+          content: qrCodeBuffer,
+          contentType: 'image/png',
+        },
+      ],
+    );
+
+    if (!emailResponse.success) {
+      throw new InternalServerException(
+        'Email Error',
+        'Error while sending email',
+      );
+    }
   }
 }

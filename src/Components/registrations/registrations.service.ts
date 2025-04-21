@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { Request } from 'express';
 import { uuidv7 } from 'uuidv7';
+import { Op } from 'sequelize';
 
 import { CreateRegistrationDto } from './dto/create-registration.dto';
 import { InitializeTransactionDto } from '../transactions/dto/create-transaction.dto';
@@ -12,15 +13,19 @@ import { Transaction } from '../transactions/entities/transaction.entity';
 import { TransactionsService } from '../transactions/transactions.service';
 import { TransactionResponse, TransactionType } from '../transactions/types';
 import { RegistrationResponseData, RegistrationStatus } from './types';
-import { EmailService, Utils } from '../utils';
-import { eventRegistrationEmail } from '../utils/templates/event-registration';
+import {
+  eventRegistrationEmail,
+  EmailService,
+  successResponse,
+  Utils,
+} from '../../common/utils';
 import {
   BadRequestException,
   InternalServerException,
   NotFoundException,
 } from '../../common/exceptions';
 import { AppResponse } from '../global/types';
-import { successResponse } from '../utils/app';
+import { Ticket } from '../events/entities/ticket.entity';
 
 @Injectable()
 export class RegistrationsService {
@@ -31,6 +36,7 @@ export class RegistrationsService {
     private sequelize: Sequelize,
     private transactionService: TransactionsService,
     private emailService: EmailService,
+    @InjectModel(Ticket) private ticketModel: typeof Ticket,
   ) {}
 
   private getTransactionInitializer(type: TransactionType) {
@@ -52,7 +58,10 @@ export class RegistrationsService {
     );
   }
 
-  async create(registrationBody: CreateRegistrationDto, req: Request): Promise<AppResponse<RegistrationResponseData>> {
+  async create(
+    registrationBody: CreateRegistrationDto,
+    req: Request,
+  ): Promise<AppResponse<RegistrationResponseData>> {
     if (!registrationBody) {
       throw new BadRequestException(
         'Missing data',
@@ -60,11 +69,13 @@ export class RegistrationsService {
       );
     }
 
-    const { eventId, type, fullName, email, phoneNumber } = registrationBody;
+    const { eventId, type, fullName, email, phoneNumber, ticketId } =
+      registrationBody;
 
     const event = await this.eventModel.findOne({
       where: { id: eventId, active: true },
     });
+
     if (!event) {
       throw new NotFoundException(
         'Event does not exist or is not active',
@@ -72,24 +83,40 @@ export class RegistrationsService {
       );
     }
 
-    if (
-      event.dataValues.capacity !== 0 &&
-      event.dataValues.registered === event.dataValues.capacity
-    ) {
-      throw new BadRequestException(
-        'Capacity Filled',
-        'The capacity for this event has been reached',
-      );
-    }
-
     const isPaidEvent = event.dataValues.paid;
     const transaction = await this.sequelize.transaction();
-    const baseUrl =
-      req.headers.origin ||
-      process.env.FFRONTEND_BASE_URL ||
-      'https://ticxpress.com';
 
     try {
+      let ticket: Ticket | null = null;
+
+      if (isPaidEvent) {
+        if (!ticketId) {
+          throw new BadRequestException(
+            'Missing ticket',
+            'Please select a ticket tier for this paid event.',
+          );
+        }
+
+        ticket = await this.ticketModel.findOne({
+          where: {
+            id: ticketId,
+            eventId,
+            [Op.or]: [
+              { quantity: 0 },
+              Sequelize.literal('"quantity" > "registered"'),
+            ],
+          },
+          transaction,
+        });
+
+        if (!ticket) {
+          throw new BadRequestException(
+            'Unavailable',
+            'The selected ticket tier is either sold out or invalid.',
+          );
+        }
+      }
+
       const registrationId = uuidv7();
       const registration = await this.registerModel.create(
         {
@@ -134,12 +161,13 @@ export class RegistrationsService {
         const appResponse: AppResponse<TransactionResponse> =
           await initializeTrx({
             eventId,
+            ticketId,
             fullName,
             email,
             phoneNumber,
           });
 
-        const trxResult: TransactionResponse = appResponse.data;
+        const trxResult = appResponse.data;
 
         await this.trxModel.update(
           { registrationId, registrationCompleted: false },
@@ -160,13 +188,12 @@ export class RegistrationsService {
         );
       }
 
-      const eventUrl = `${baseUrl}/events/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
-      const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
-
-      const emailResponse = await this.emailService.sendEmail(
+      const eventUrl = Utils.generateEventUrl(event.dataValues.name, { req });
+      await Utils.sendSuccessEmail({
+        emailService: this.emailService,
         email,
-        `Registration successful for ${event.dataValues.name}`,
-        eventRegistrationEmail(
+        subject: `Registration successful for ${event.dataValues.name}`,
+        htmlTemplate: eventRegistrationEmail(
           event.dataValues.name,
           event.dataValues.time.toISOString(),
           event.dataValues.location,
@@ -175,26 +202,17 @@ export class RegistrationsService {
           registration.dataValues.accessCode,
           eventUrl,
         ),
-        [
-          {
-            filename: 'event_qrcode.png',
-            content: qrCodeBuffer,
-            contentType: 'image/png',
-          },
-        ],
-      );
-
-      if (!emailResponse.success) {
-        await transaction.rollback();
-        throw new InternalServerException(
-          'Email Error',
-          'Error while sending email',
-        );
-      }
+        eventUrl,
+      });
 
       await this.eventModel.update(
         { registered: Sequelize.literal('registered + 1') },
         { where: { id: event.id }, transaction },
+      );
+
+      await this.ticketModel.update(
+        { registered: Sequelize.literal('registered + 1') },
+        { where: { id: ticket!.id }, transaction },
       );
 
       await transaction.commit();

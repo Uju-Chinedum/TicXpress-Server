@@ -39,5 +39,10 @@ export class CreateRegistrationDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
+  ticketId?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
   type?: TransactionType;
 }

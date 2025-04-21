@@ -8,16 +8,20 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
 import { Registration } from '../registrations/entities/registration.entity';
-import { eventCreationEmail, Utils, EmailService } from '../utils';
+import {
+  eventCreationEmail,
+  Utils,
+  EmailService,
+  successResponse,
+} from '../../common/utils';
 import { PaginationDto } from '../global/dto';
 import {
   BadRequestException,
-  InternalServerException,
   NotFoundException,
   UnauthorizedException,
 } from '../../common/exceptions';
 import { AppResponse, PaginatedResponse } from '../global/types';
-import { successResponse } from '../utils/app';
+import { Ticket } from './entities/ticket.entity';
 
 @Injectable()
 export class EventsService {
@@ -26,6 +30,7 @@ export class EventsService {
     private emailService: EmailService,
     private sequelize: Sequelize,
     @InjectModel(Registration) private registerModel: typeof Registration,
+    @InjectModel(Ticket) private ticketModel: typeof Ticket,
   ) {}
 
   private readonly eventAttributes = [
@@ -41,6 +46,7 @@ export class EventsService {
     'amount',
     'cryptoAmount',
     'currency',
+    'tickets',
     'updatedAt',
   ];
 
@@ -109,57 +115,81 @@ export class EventsService {
         'Please provide all details for your event.',
       );
 
+    if (
+      eventBody.paid &&
+      (!Array.isArray(eventBody.tickets) || eventBody.tickets.length === 0)
+    )
+      throw new BadRequestException(
+        'Missing Details',
+        'Please provide ticket details for paid events.',
+      );
+
     const transaction = await this.sequelize.transaction();
-    const baseUrl =
-      req?.headers.origin ||
-      process.env.FFRONTEND_BASE_URL ||
-      'https://ticxpress.com';
 
     try {
-      const { name, email, amount, currency } = eventBody;
+      const { name, email } = eventBody;
       const dashboardCode = Utils.generateDashboardCode();
-      const cryptoAmount =
-        amount && currency
-          ? await Utils.fiatToCrypto(amount, currency)
-          : undefined;
 
       const event = await this.eventModel.create(
-        { id: uuidv7(), ...eventBody, dashboardCode, cryptoAmount },
+        { id: uuidv7(), ...eventBody, dashboardCode },
         { transaction },
       );
 
-      const eventUrl = `${baseUrl}/${name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
-      const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
-
-      const emailResponse = await this.emailService.sendEmail(
-        email,
-        `${name} created successfully`,
-        eventCreationEmail(event, eventUrl),
-        [
-          {
-            filename: 'event_qrcode.png',
-            content: qrCodeBuffer,
-            contentType: 'image/png',
-          },
-        ],
-      );
-
-      if (!emailResponse.success) {
-        await transaction.rollback();
-        throw new InternalServerException(
-          'Email Error',
-          'Error while sending email',
+      if (eventBody.tickets?.length) {
+        const tiers = await Promise.all(
+          eventBody.tickets.map(async (tier) => ({
+            ...tier,
+            id: uuidv7(),
+            eventId: event.id,
+            cryptoAmount:
+              tier.amount && tier.currency
+                ? await Utils.fiatToCrypto(tier.amount, tier.currency)
+                : undefined,
+          })),
         );
+
+        await this.ticketModel.bulkCreate(tiers, { transaction });
       }
 
+      const createdTickets = await this.ticketModel.findAll({
+        where: { eventId: event.id },
+        transaction,
+      });
+
+      event.tickets = createdTickets;
+
+      const eventUrl = Utils.generateEventUrl(name, {
+        req,
+        includeEventsPrefix: false,
+        includeDashboardSuffix: true,
+      });
+      await Utils.sendSuccessEmail({
+        emailService: this.emailService,
+        email,
+        subject: `${name} created successfully`,
+        htmlTemplate: eventCreationEmail(event.get({ plain: true }), eventUrl),
+        eventUrl,
+      });
+
       await transaction.commit();
+
+      const plainEvent = event.get({ plain: true }) as any;
+      plainEvent.tickets = createdTickets.map((t) => {
+        const ticket = t.get({ plain: true });
+        return {
+          id: ticket.id,
+          name: ticket.name,
+          amount: ticket.amount,
+          currency: ticket.currency,
+          cryptoAmount: ticket.cryptoAmount,
+          cryptoCurrency: 'USDC',
+        };
+      });
+
       return successResponse(
         'Event created successfully. Check your email for details.',
         Object.fromEntries(
-          this.eventAttributes.map((key) => [
-            key,
-            event.get({ plain: true })[key],
-          ]),
+          this.eventAttributes.map((key) => [key, plainEvent[key]]),
         ),
         HttpStatus.CREATED,
       );

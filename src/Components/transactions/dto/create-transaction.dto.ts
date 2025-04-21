@@ -80,8 +80,36 @@ export class CreateTransactionDto {
 }
 
 export class InitializeTransactionDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
+    message: 'What is the event id?',
+  })
   eventId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
+    message: 'What is the ticket id?',
+  })
+  ticketId?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty({
+    message: 'What is your full name?',
+  })
   fullName: string;
+
+  @ApiProperty()
+  @IsEmail()
+  @IsNotEmpty({
+    message: 'What is your email address?',
+  })
   email: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
   phoneNumber?: string;
 }

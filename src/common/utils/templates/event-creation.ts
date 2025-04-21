@@ -1,6 +1,10 @@
-import { Event } from '../../events/entities/event.entity';
+import { Ticket } from '../../../Components/events/entities/ticket.entity';
+import { Event } from '../../../Components/events/entities/event.entity';
 
-export const eventCreationEmail = (event: Event, eventUrl: string): string => {
+export const eventCreationEmail = (
+  event: Partial<Event> & { tickets?: Ticket[] },
+  eventUrl: string,
+): string => {
   const {
     name,
     organizer,
@@ -8,15 +12,22 @@ export const eventCreationEmail = (event: Event, eventUrl: string): string => {
     location,
     description,
     paid,
-    amount,
-    currency,
-    cryptoAmount,
     dashboardCode,
-  } = event.dataValues;
+    tickets = [],
+  } = event;
 
   const amountSection = paid
-    ? `<p><strong>💰 Amount:</strong> ${currency}${amount?.toFixed(2)}</p>
-    <p><strong>💰 Crypto Amount:</strong> ${cryptoAmount} USDC</p>`
+    ? tickets
+        .map(
+          (ticket) => `
+        <div style="margin-bottom: 10px;">
+          <p><strong>🎟 ${ticket.name}</strong></p>
+          <p>💰 ${ticket.currency}${ticket.amount?.toFixed(2)} | 🪙 ${ticket.cryptoAmount} USDC</p>
+          <p>🎫 Quantity: ${ticket.quantity}</p>
+        </div>
+      `,
+        )
+        .join('')
     : '<p><strong>🎟 FREE ENTRY</strong></p>';
 
   const styles = `
@@ -94,32 +105,32 @@ export const eventCreationEmail = (event: Event, eventUrl: string): string => {
     <!DOCTYPE html>
     <html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Event Created Successfully</title>
-        ${styles}
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Event Created Successfully</title>
+      ${styles}
     </head>
     <body>
       <div class="container">
-          <div class="header">🎉 Event Created Successfully!</div>
-          <div class="content">
-              <p>Dear <strong>${organizer}</strong>,</p>
-              <p>Your event <strong>"${name}"</strong> has been successfully created! 🎊</p>
-              
-              <div class="event-details">
-                  <p><strong>📅 Date & Time:</strong> ${time}</p>
-                  <p><strong>📍 Location:</strong> ${location}</p>
-                  <p><strong>💬 Description:</strong> ${description}</p>
-                  <p><strong>💳 Paid Event:</strong> ${paid ? 'Yes' : 'No'}</p>
-                  ${amountSection}
-                  <p><strong>🔑 Dashboard Code:</strong> ${dashboardCode}</p>
-              </div>
-              
-              <a href="${eventUrl}" class="cta-button">View Event Dashboard</a>
-              <p>Or scan the attached QR code</p>
-              <p>If you have any questions, feel free to contact us.</p>
+        <div class="header">🎉 Event Created Successfully!</div>
+        <div class="content">
+          <p>Dear <strong>${organizer}</strong>,</p>
+          <p>Your event <strong>"${name}"</strong> has been successfully created! 🎊</p>
+
+          <div class="event-details">
+            <p><strong>📅 Date & Time:</strong> ${time}</p>
+            <p><strong>📍 Location:</strong> ${location}</p>
+            <p><strong>💬 Description:</strong> ${description}</p>
+            <p><strong>💳 Paid Event:</strong> ${paid ? 'Yes' : 'No'}</p>
+            ${amountSection}
+            <p><strong>🔑 Dashboard Code:</strong> ${dashboardCode}</p>
           </div>
-          <div class="footer">© 2025 TicXpress | All rights reserved.</div>
+
+          <a href="${eventUrl}" class="cta-button">View Event Dashboard</a>
+          <p>Or scan the attached QR code</p>
+          <p>If you have any questions, feel free to contact us.</p>
+        </div>
+        <div class="footer">© 2025 TicXpress | All rights reserved.</div>
       </div>
     </body>
     </html>

@@ -1,10 +1,17 @@
-import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { ConfigService } from '@nestjs/config';
+import axios, { AxiosResponse } from 'axios';
+import { createHmac, timingSafeEqual } from 'crypto';
+import { uuidv7 } from 'uuidv7';
+import { Sequelize } from 'sequelize-typescript';
+import { Request } from 'express';
+
 import {
   CreateTransactionDto,
   InitializeTransactionDto,
 } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-import { InjectModel } from '@nestjs/sequelize';
 import { Transaction } from './entities/transaction.entity';
 import {
   PaystackCallbackDto,
@@ -20,8 +27,6 @@ import {
   InternalServerException,
   NotFoundException,
 } from '../../common/exceptions';
-import { ConfigService } from '@nestjs/config';
-import axios, { AxiosResponse } from 'axios';
 import {
   COINGATE_INIT_URL,
   PAYSTACK_INIT_URL,
@@ -33,20 +38,20 @@ import {
   TransactionStatus,
   TransactionType,
 } from './types';
-import { createHmac, timingSafeEqual } from 'crypto';
-import { uuidv7 } from 'uuidv7';
-import { EmailService, Utils } from '../utils';
+import {
+  eventRegistrationEmail,
+  EmailService,
+  successResponse,
+  Utils,
+} from '../../common/utils';
 import {
   CoingateInitTransactionDto,
   CoingateInitTransactionResponseDto,
 } from './dto/coingate.dto';
 import { RegistrationStatus } from '../registrations/types';
 import { Registration } from '../registrations/entities/registration.entity';
-import { eventRegistrationEmail } from '../utils/templates/event-registration';
-import { Sequelize } from 'sequelize-typescript';
-import { Request } from 'express';
 import { AppResponse } from '../global/types';
-import { successResponse } from '../utils/app';
+import { Ticket } from '../events/entities/ticket.entity';
 
 @Injectable()
 export class TransactionsService {
@@ -60,6 +65,8 @@ export class TransactionsService {
     private registerModel: typeof Registration,
     private sequelize: Sequelize,
     private emailService: EmailService,
+    @InjectModel(Ticket)
+    private ticketModel: typeof Ticket,
   ) {}
 
   private async updateTransactionStatus(
@@ -154,54 +161,43 @@ export class TransactionsService {
   }
 
   private async sendRegistrationEmail(registration, event, req?: Request) {
-    const baseUrl =
-      req?.headers.origin ||
-      process.env.FFRONTEND_BASE_URL ||
-      'https://ticxpress.com';
-
-    const eventUrl = `${baseUrl}/${event.dataValues.name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
-    const emailContent = eventRegistrationEmail(
-      event.dataValues.name,
-      event.dataValues.time,
-      event.dataValues.location,
-      event.dataValues.description,
-      registration.dataValues.fullName,
-      registration.dataValues.accessCode,
+    const eventUrl = Utils.generateEventUrl(event.dataValues.name, { req });
+    await Utils.sendSuccessEmail({
+      emailService: this.emailService,
+      email: registration.dataValues.email,
+      subject: `Registration successful for ${event.dataValues.name}`,
+      htmlTemplate: eventRegistrationEmail(
+        event.dataValues.name,
+        event.dataValues.time,
+        event.dataValues.location,
+        event.dataValues.description,
+        registration.dataValues.fullName,
+        registration.dataValues.accessCode,
+        eventUrl,
+      ),
       eventUrl,
-    );
-    const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
-
-    const emailResponse = await this.emailService.sendEmail(
-      registration.dataValues.email,
-      `Registration successful for ${event.dataValues.name}`,
-      emailContent,
-      [
-        {
-          filename: 'event_qrcode.png',
-          content: qrCodeBuffer,
-          contentType: 'image/png',
-        },
-      ],
-    );
-
-    if (!emailResponse.success) {
-      throw new InternalServerException(
-        'Email Error',
-        'Error while sending email',
-      );
-    }
+    });
   }
 
   async initializePaystackTransaction(
     dto: InitializeTransactionDto,
   ): Promise<AppResponse<TransactionResponse>> {
-    const { eventId, fullName, email, phoneNumber } = dto;
+    const { eventId, ticketId, fullName, email, phoneNumber } = dto;
 
     const event = await this.eventModel.findOne({ where: { id: eventId } });
     if (!event)
       throw new NotFoundException(
         'Event Not Found',
         `No event found with id: ${eventId}`,
+      );
+
+    const ticket = await this.ticketModel.findOne({
+      where: { id: ticketId, eventId },
+    });
+    if (!ticket)
+      throw new NotFoundException(
+        'Ticket Not Found',
+        `No ticket tier found with id: ${ticketId} for event: ${eventId}`,
       );
 
     const metadata: PaystackMetadata = {
@@ -217,12 +213,17 @@ export class TransactionsService {
           variable_name: 'email',
           value: email,
         },
+        {
+          display_name: 'Ticket Tier',
+          variable_name: 'ticket_tier',
+          value: ticket.dataValues.name,
+        },
       ],
     };
 
     const paystackTransaction: PaystackCreateTransactionDto = {
       email,
-      amount: event.dataValues.amount * 100,
+      amount: ticket.dataValues.amount * 100,
       metadata,
     };
 
@@ -254,8 +255,8 @@ export class TransactionsService {
         email,
         phoneNumber,
         eventId,
-        amount: event.dataValues.amount,
-        currency: event.dataValues.currency,
+        amount: ticket.dataValues.amount,
+        currency: ticket.dataValues.currency,
         transactionReference: Utils.generateTrxReference(),
         type: TransactionType.CARD,
         gatewayReference: data.reference,
@@ -408,7 +409,8 @@ export class TransactionsService {
   async initializeCoingateTransaction(
     dto: InitializeTransactionDto,
   ): Promise<AppResponse<TransactionResponse>> {
-    const { eventId, fullName, email, phoneNumber } = dto;
+    const { eventId, ticketId, fullName, email, phoneNumber } = dto;
+
     const event = await this.eventModel.findOne({ where: { id: eventId } });
     if (!event)
       throw new NotFoundException(
@@ -416,14 +418,23 @@ export class TransactionsService {
         `No event found with id: ${eventId}`,
       );
 
+    const ticket = await this.ticketModel.findOne({
+      where: { id: ticketId, eventId },
+    });
+    if (!ticket)
+      throw new NotFoundException(
+        'Ticket Not Found',
+        `No ticket tier found with id: ${ticketId} for event: ${eventId}`,
+      );
+
     const trxRef = Utils.generateTrxReference();
     const token = trxRef.slice(5);
 
     const coingateTransaction: CoingateInitTransactionDto = {
       order_id: trxRef,
-      price_amount: event.dataValues.cryptoAmount,
-      price_currency: event.dataValues.cryptoSymbol,
-      receive_currency: event.dataValues.cryptoSymbol,
+      price_amount: ticket.dataValues.cryptoAmount,
+      price_currency: 'USDC',
+      receive_currency: 'USDC',
       title: event.dataValues.name,
       description: event.dataValues.description,
       callback_url: this.configService.get<string>('COINGATE_CALLBACK_URL')!,
@@ -451,8 +462,8 @@ export class TransactionsService {
         email,
         phoneNumber,
         eventId,
-        amount: event.dataValues.cryptoAmount,
-        currency: event.dataValues.cryptoSymbol,
+        amount: ticket.dataValues.cryptoAmount,
+        currency: 'USDC',
         transactionReference: trxRef,
         type: TransactionType.CRYPTO,
         gatewayReference: token,
