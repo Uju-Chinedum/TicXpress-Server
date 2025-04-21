@@ -1,5 +1,5 @@
-import { Ticket } from '../../events/entities/ticket.entity';
-import { Event } from '../../events/entities/event.entity';
+import { Ticket } from '../../../Components/events/entities/ticket.entity';
+import { Event } from '../../../Components/events/entities/event.entity';
 
 export const eventCreationEmail = (
   event: Partial<Event> & { tickets?: Ticket[] },

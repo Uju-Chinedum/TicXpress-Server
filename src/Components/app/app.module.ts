@@ -6,7 +6,7 @@ import { EventsModule } from '../events/events.module';
 import { GlobalModule } from '../global/global.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
-import { CloudinaryService } from '../utils/cloudinary.service';
+import { CloudinaryService } from '../../common/utils';
 
 @Module({
   imports: [

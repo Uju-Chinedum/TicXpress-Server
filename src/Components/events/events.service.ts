@@ -8,16 +8,19 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
 import { Registration } from '../registrations/entities/registration.entity';
-import { eventCreationEmail, Utils, EmailService } from '../utils';
+import {
+  eventCreationEmail,
+  Utils,
+  EmailService,
+  successResponse,
+} from '../../common/utils';
 import { PaginationDto } from '../global/dto';
 import {
   BadRequestException,
-  InternalServerException,
   NotFoundException,
   UnauthorizedException,
 } from '../../common/exceptions';
 import { AppResponse, PaginatedResponse } from '../global/types';
-import { successResponse } from '../utils/app';
 import { Ticket } from './entities/ticket.entity';
 
 @Injectable()
@@ -122,10 +125,6 @@ export class EventsService {
       );
 
     const transaction = await this.sequelize.transaction();
-    const baseUrl =
-      req?.headers.origin ||
-      process.env.FRONTEND_BASE_URL ||
-      'https://ticxpress.com';
 
     try {
       const { name, email } = eventBody;
@@ -159,28 +158,18 @@ export class EventsService {
 
       event.tickets = createdTickets;
 
-      const eventUrl = `${baseUrl}/${name.replace(/\s+/g, '').toLowerCase()}/dashboard`;
-      const qrCodeBuffer = await Utils.generateQRCode(eventUrl);
-
-      const emailResponse = await this.emailService.sendEmail(
+      const eventUrl = Utils.generateEventUrl(name, {
+        req,
+        includeEventsPrefix: false,
+        includeDashboardSuffix: true,
+      });
+      await Utils.sendSuccessEmail({
+        emailService: this.emailService,
         email,
-        `${name} created successfully`,
-        eventCreationEmail(event.get({ plain: true }), eventUrl),
-        [
-          {
-            filename: 'event_qrcode.png',
-            content: qrCodeBuffer,
-            contentType: 'image/png',
-          },
-        ],
-      );
-
-      if (!emailResponse.success) {
-        throw new InternalServerException(
-          'Email Error',
-          'Error while sending email',
-        );
-      }
+        subject: `${name} created successfully`,
+        htmlTemplate: eventCreationEmail(event.get({ plain: true }), eventUrl),
+        eventUrl,
+      });
 
       await transaction.commit();
 
@@ -193,7 +182,7 @@ export class EventsService {
           amount: ticket.amount,
           currency: ticket.currency,
           cryptoAmount: ticket.cryptoAmount,
-          cryptoCurrency: "USDC"
+          cryptoCurrency: 'USDC',
         };
       });
 

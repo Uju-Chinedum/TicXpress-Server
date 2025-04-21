@@ -16,7 +16,7 @@ import {
 } from 'sequelize';
 import { GlobalService } from 'src/Components/global/global.service';
 import { ErrorData } from 'src/Components/global/types';
-import { errorResponse } from 'src/Components/utils/app';
+import { errorResponse } from '../utils';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

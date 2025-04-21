@@ -54,6 +54,11 @@ export class Ticket extends Model {
   public quantity: number;
 
   @AllowNull(false)
+  @Default(0)
+  @Column(DataType.INTEGER)
+  public registered: number;
+
+  @AllowNull(false)
   @CreatedAt
   @Column(DataType.DATE)
   declare createdAt: Date;
