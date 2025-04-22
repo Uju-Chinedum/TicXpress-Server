@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class TicketDto {
+export class CreateTicketDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty({

@@ -12,13 +12,14 @@ import {
   HttpStatus,
   Headers,
 } from '@nestjs/common';
+import { Request } from 'express';
+
 import { TransactionsService } from './transactions.service';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { InitializeTransactionDto } from './dto/create-transaction.dto';
 import { PaystackCallbackDto, PaystackWebhookDto } from './dto/paystack.dto';
 import { BadRequestException } from '../../common/exceptions';
 import { PAYSTACK_WEBHOOK_SIGNATURE_KEY } from '../global/constants';
-import { Request } from 'express';
 
 @Controller('api/v1/transactions')
 export class TransactionsController {
@@ -30,7 +31,10 @@ export class TransactionsController {
   }
 
   @Get('paystack/callback')
-  verifyPaystackTransaction(@Query() query: PaystackCallbackDto, @Req() req: Request) {
+  verifyPaystackTransaction(
+    @Query() query: PaystackCallbackDto,
+    @Req() req: Request,
+  ) {
     return this.transactionsService.verifyPaystackTransaction(query, req);
   }
 

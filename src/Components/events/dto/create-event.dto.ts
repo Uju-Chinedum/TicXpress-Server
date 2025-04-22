@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { TicketDto } from './ticket.dto';
+import { CreateTicketDto } from './create-ticket.dto';
 
 export class CreateEventDto {
   @ApiProperty()
@@ -77,7 +77,7 @@ export class CreateEventDto {
 
   @ApiProperty({ required: false })
   @IsOptional()
-  @ValidateNested({each: true})
-  @Type(() => TicketDto)
-  tickets?: TicketDto[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateTicketDto)
+  tickets?: CreateTicketDto[];
 }

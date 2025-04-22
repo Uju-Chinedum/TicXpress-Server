@@ -22,6 +22,7 @@ import {
 } from '../../common/exceptions';
 import { AppResponse, PaginatedResponse } from '../global/types';
 import { Ticket } from './entities/ticket.entity';
+import { UpdateTicketDto } from './dto/update-ticket.dto';
 
 @Injectable()
 export class EventsService {
@@ -351,5 +352,29 @@ export class EventsService {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  async updateTicket(
+    dashboardCode: string,
+    ticketId: string,
+    updateTicketDto: UpdateTicketDto,
+  ): Promise<AppResponse<Partial<Ticket>>> {
+    if (!dashboardCode)
+      throw new UnauthorizedException(
+        'Permission Denied',
+        'Please provide your dashboad code to access this page',
+      );
+
+    const [count, ticket] = await this.ticketModel.update(
+      { ...updateTicketDto },
+      { where: { id: ticketId }, returning: true },
+    );
+    if (count === 0)
+      throw new NotFoundException(
+        'Ticket Not Found',
+        `No ticket found with id: ${ticketId}`,
+      );
+
+    return successResponse('Ticket Updated', ticket[0]);
   }
 }
