@@ -365,6 +365,14 @@ export class EventsService {
         'Please provide your dashboad code to access this page',
       );
 
+    if (updateTicketDto) {
+      const { amount, currency } = updateTicketDto;
+      if (amount && currency) {
+        const cryptoAmount = await Utils.fiatToCrypto(amount, currency);
+        updateTicketDto.cryptoAmount = cryptoAmount;
+      }
+    }
+
     const [count, ticket] = await this.ticketModel.update(
       { ...updateTicketDto },
       { where: { id: ticketId }, returning: true },

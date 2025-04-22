@@ -1,4 +1,12 @@
-import { PartialType } from "@nestjs/mapped-types";
-import { CreateTicketDto } from "./create-ticket.dto";
+import { PartialType } from '@nestjs/mapped-types';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional } from 'class-validator';
 
-export class UpdateTicketDto extends PartialType(CreateTicketDto) {}
+import { CreateTicketDto } from './create-ticket.dto';
+
+export class UpdateTicketDto extends PartialType(CreateTicketDto) {
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  cryptoAmount?: number;
+}

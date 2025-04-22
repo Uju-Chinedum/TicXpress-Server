@@ -79,7 +79,7 @@ export class EventsController {
     return this.eventsService.verifyAttendee(dashboardCode, accessCode);
   }
 
-  @Patch('organizer/ticket/:ticketId')
+  @Patch('organizer/tickets/:ticketId')
   updateTicket(
     @Query('dashboardCode') dashboardCode: string,
     @Param('ticketId') ticketId: string,
