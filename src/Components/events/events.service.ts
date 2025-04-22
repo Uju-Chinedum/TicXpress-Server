@@ -39,14 +39,9 @@ export class EventsService {
     'name',
     'description',
     'imageUrl',
-    'capacity',
     'location',
     'time',
     'paid',
-    'amount',
-    'cryptoAmount',
-    'currency',
-    'tickets',
     'updatedAt',
   ];
 
@@ -78,6 +73,13 @@ export class EventsService {
     const event = await this.eventModel.findOne({
       where: { dashboardCode },
       attributes: attributes || this.organizerAttributes,
+      include: [
+        {
+          model: Ticket,
+          as: 'tickets',
+          attributes: ['id', 'name', 'amount', 'currency', 'cryptoAmount'],
+        },
+      ],
     });
     if (!event) {
       throw new NotFoundException(
@@ -95,6 +97,13 @@ export class EventsService {
     const event = await this.eventModel.findOne({
       where: { id, active: true },
       attributes: attributes || this.eventAttributes,
+      include: [
+        {
+          model: Ticket,
+          as: 'tickets',
+          attributes: ['id', 'name', 'amount', 'currency', 'cryptoAmount'],
+        },
+      ],
     });
     if (!event) {
       throw new NotFoundException(

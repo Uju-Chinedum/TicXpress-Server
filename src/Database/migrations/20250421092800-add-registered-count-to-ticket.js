@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     /**
      * Add altering commands here.
      *
@@ -15,6 +15,17 @@ module.exports = {
       defaultValue: 0,
     });
 
+    await queryInterface.addColumn('registrations', 'ticketId', {
+      type: Sequelize.UUID,
+      allowNull: true,
+      references: {
+        model: 'tickets',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    });
+
     await queryInterface.addColumn('tickets', 'registered', {
       type: Sequelize.INTEGER,
       allowNull: false,
@@ -22,7 +33,7 @@ module.exports = {
     });
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     /**
      * Add reverting commands here.
      *
@@ -35,6 +46,8 @@ module.exports = {
       defaultValue: 0,
     });
 
+    await queryInterface.removeColumn('registrations', 'ticketId');
+
     await queryInterface.removeColumn('tickets', 'registered');
-  }
+  },
 };

@@ -11,8 +11,10 @@ import {
   ForeignKey,
   BelongsTo,
   Default,
+  HasMany,
 } from 'sequelize-typescript';
 import { Event } from './event.entity';
+import { Registration } from '../../registrations/entities/registration.entity';
 
 @Table({
   tableName: 'tickets',
@@ -70,4 +72,10 @@ export class Ticket extends Model {
 
   @BelongsTo(() => Event)
   event: Event;
+
+  @HasMany(() => Registration, {
+    as: 'registrations',
+    hooks: true,
+  })
+  registrations: Registration[];
 }

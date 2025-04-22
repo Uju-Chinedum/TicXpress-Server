@@ -39,6 +39,13 @@ export class RegistrationsService {
     @InjectModel(Ticket) private ticketModel: typeof Ticket,
   ) {}
 
+  private isTicketAvailable(ticket: Ticket): boolean {
+    return (
+      ticket.dataValues.quantity === 0 ||
+      ticket.dataValues.registered < ticket.dataValues.quantity
+    );
+  }
+
   private getTransactionInitializer(type: TransactionType) {
     const transactionInitializers = {
       [TransactionType.CARD]: (dto: InitializeTransactionDto) =>
@@ -89,22 +96,25 @@ export class RegistrationsService {
     try {
       let ticket: Ticket | null = null;
 
-      if (isPaidEvent) {
-        if (!ticketId) {
-          throw new BadRequestException(
-            'Missing ticket',
-            'Please select a ticket tier for this paid event.',
-          );
-        }
+      const ticketCount = await this.ticketModel.count({
+        where: { eventId },
+        transaction,
+      });
 
+      const eventHasTickets = ticketCount > 0;
+
+      if (eventHasTickets && !ticketId) {
+        throw new BadRequestException(
+          'Missing ticket',
+          'This event requires a ticket tier. Please select one.',
+        );
+      }
+
+      if (ticketId) {
         ticket = await this.ticketModel.findOne({
           where: {
             id: ticketId,
             eventId,
-            [Op.or]: [
-              { quantity: 0 },
-              Sequelize.literal('"quantity" > "registered"'),
-            ],
           },
           transaction,
         });
@@ -112,7 +122,14 @@ export class RegistrationsService {
         if (!ticket) {
           throw new BadRequestException(
             'Unavailable',
-            'The selected ticket tier is either sold out or invalid.',
+            'The selected ticket tier is invalid.',
+          );
+        }
+
+        if (!this.isTicketAvailable(ticket)) {
+          throw new BadRequestException(
+            'Unavailable',
+            'The selected ticket tier is sold out.',
           );
         }
       }
@@ -121,7 +138,11 @@ export class RegistrationsService {
       const registration = await this.registerModel.create(
         {
           id: registrationId,
-          ...registrationBody,
+          eventId,
+          fullName,
+          email,
+          phoneNumber,
+          ticketId: ticket?.id ?? null,
           transactionId: null,
           accessCode: isPaidEvent ? null : Utils.generateAccessCode(),
           status: isPaidEvent
@@ -181,6 +202,7 @@ export class RegistrationsService {
 
         await transaction.commit();
         responseData.paymentLink = trxResult.paymentLink;
+
         return successResponse(
           'Registration Pending. Please proceed with payment',
           responseData,
@@ -210,12 +232,15 @@ export class RegistrationsService {
         { where: { id: event.id }, transaction },
       );
 
-      await this.ticketModel.update(
-        { registered: Sequelize.literal('registered + 1') },
-        { where: { id: ticket!.id }, transaction },
-      );
+      if (ticket) {
+        await this.ticketModel.update(
+          { registered: Sequelize.literal('registered + 1') },
+          { where: { id: ticket.id }, transaction },
+        );
+      }
 
       await transaction.commit();
+
       return successResponse(
         'Registration successful',
         responseData,

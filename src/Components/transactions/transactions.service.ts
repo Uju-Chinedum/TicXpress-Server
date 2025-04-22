@@ -115,6 +115,7 @@ export class TransactionsService {
 
       const registration = await this.registerModel.findByPk(
         transaction.dataValues.registrationId,
+        { transaction: t },
       );
 
       if (!registration) {
@@ -132,18 +133,36 @@ export class TransactionsService {
 
       const event = await this.eventModel.findByPk(
         registration.dataValues.eventId,
+        { transaction: t },
       );
       if (!event) {
         await t.rollback();
         return;
       }
 
+      const ticket = await this.ticketModel.findByPk(
+        registration.dataValues.ticketId,
+        { transaction: t },
+      );
+
+      const ticketAmount = ticket?.dataValues?.amount ?? 0;
+
+      if (ticket) {
+        await this.ticketModel.update(
+          {
+            registered: Sequelize.literal('"registered" + 1'),
+          },
+          {
+            where: { id: ticket.id },
+            transaction: t,
+          },
+        );
+      }
+      
       await this.eventModel.update(
         {
-          registered: Sequelize.literal('registered + 1'),
-          totalAmount: Sequelize.literal(
-            `"totalAmount" + ${event.dataValues.amount}`,
-          ),
+          registered: Sequelize.literal('"registered" + 1'),
+          totalAmount: Sequelize.literal(`"totalAmount" + ${ticketAmount}`),
         },
         { where: { id: event.id }, transaction: t },
       );

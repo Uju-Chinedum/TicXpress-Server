@@ -15,6 +15,7 @@ import {
 import { Event } from '../../events/entities/event.entity';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { RegistrationStatus } from '../types';
+import { Ticket } from '../../events/entities/ticket.entity';
 
 @Table({
   tableName: 'registrations',
@@ -45,6 +46,11 @@ export class Registration extends Model {
   @AllowNull(false)
   @Column(DataType.UUID)
   public eventId: string;
+
+  @ForeignKey(() => Ticket)
+  @AllowNull(true)
+  @Column(DataType.UUID)
+  public ticketId: string;
 
   @ForeignKey(() => Transaction)
   @AllowNull(true)
@@ -81,4 +87,7 @@ export class Registration extends Model {
 
   @BelongsTo(() => Transaction)
   transaction: Transaction;
+
+  @BelongsTo(() => Ticket)
+  ticket: Ticket;
 }
