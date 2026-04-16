@@ -76,6 +76,8 @@ export const eventRegistrationEmail = (
         }
     </style>`;
 
+    const year = new Date().getFullYear();
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -102,7 +104,7 @@ export const eventRegistrationEmail = (
             <p>Or scan the attached QR code</p>
             <p>If you have any questions, feel free to contact us.</p>
         </div>
-        <div class="footer">© 2025 TicXpress | All rights reserved.</div>
+        <div class="footer">© ${year} TicXpress | All rights reserved.</div>
     </div>
 </body>
 </html>
