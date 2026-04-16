@@ -25,23 +25,23 @@ export class ErrorLogs extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public level: string;
+  declare level: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public name: string;
+  declare name: string;
 
   @AllowNull(false)
   @Column(DataType.TEXT)
-  public message: string;
+  declare message: string;
 
   @AllowNull(true)
   @Column(DataType.TEXT)
-  public stack?: string;
+  declare stack?: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public context?: string;
+  declare context?: string;
 
   @AllowNull(false)
   @CreatedAt

@@ -14,14 +14,14 @@ export class CreateTransactionDto {
   @IsNotEmpty({
     message: 'What is your full name?',
   })
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is your email address?',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -33,35 +33,35 @@ export class CreateTransactionDto {
   @IsNotEmpty({
     message: 'What is the id of the event?',
   })
-  eventId: string;
+  eventId!: string;
 
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty({
     message: 'What is the amount for the event?',
   })
-  amount: number;
+  amount!: number;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'What is the currency of the amount?',
   })
-  currency: string;
+  currency!: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'What is the transaction reference?',
   })
-  transactionReference: string;
+  transactionReference!: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'What is your payment type?',
   })
-  type: TransactionType;
+  type!: TransactionType;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -85,7 +85,7 @@ export class InitializeTransactionDto {
   @IsNotEmpty({
     message: 'What is the event id?',
   })
-  eventId: string;
+  eventId!: string;
 
   @ApiProperty()
   @IsString()
@@ -99,14 +99,14 @@ export class InitializeTransactionDto {
   @IsNotEmpty({
     message: 'What is your full name?',
   })
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is your email address?',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({ required: false })
   @IsString()

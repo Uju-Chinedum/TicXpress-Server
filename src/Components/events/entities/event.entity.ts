@@ -29,66 +29,66 @@ export class Event extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public email: string;
+  declare email: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public phoneNumber: string;
+  declare phoneNumber: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public organizer: string;
+  declare organizer: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  public name: string;
+  declare name: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public description: string;
+  declare description: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public imageUrl: string
+  declare imageUrl: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public location: string;
+  declare location: string;
 
   @AllowNull(false)
   @Column(DataType.DATE)
-  public time: Date;
+  declare time: Date;
 
   @AllowNull(false)
   @Default(false)
   @Column(DataType.BOOLEAN)
-  public paid: boolean;
+  declare paid: boolean;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  public dashboardCode: string;
+  declare dashboardCode: string;
 
   @AllowNull(false)
   @Default(true)
   @Column(DataType.BOOLEAN)
-  public active: boolean;
+  declare active: boolean;
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  public registered: number;
+  declare registered: number;
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  public totalAmount: number;
+  declare totalAmount: number;
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  public attended: number;
+  declare attended: number;
 
   @AllowNull(false)
   @CreatedAt
@@ -104,11 +104,11 @@ export class Event extends Model {
     as: 'transactions',
     hooks: true,
   })
-  transactions: Transaction;
+  declare transactions: Transaction;
 
   @HasMany(() => Ticket, {
     as: 'tickets',
     hooks: true,
   })
-  tickets: Ticket[];
+  declare tickets: Ticket[];
 }

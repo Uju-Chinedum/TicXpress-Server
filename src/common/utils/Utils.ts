@@ -4,6 +4,7 @@ import axios from 'axios';
 import { randomInt } from 'crypto';
 import * as QRCode from 'qrcode';
 import slugify from 'slugify';
+import { v2 as cloudinary } from 'cloudinary';
 
 import { COINGECKO_BASE_PRICE_URL } from '../../Components/global/constants';
 import { PaginatedResponse } from '../../Components/global/types';

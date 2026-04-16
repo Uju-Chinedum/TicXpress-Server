@@ -32,33 +32,33 @@ export class Ticket extends Model {
   @ForeignKey(() => Event)
   @AllowNull(false)
   @Column(DataType.UUID)
-  public eventId: string;
+  declare eventId: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public name: string;
+  declare name: string;
 
   @AllowNull(true)
   @Column(DataType.INTEGER)
-  public amount: number;
+  declare amount: number;
 
   @AllowNull(true)
   @Column(DataType.DECIMAL(20, 8))
-  public cryptoAmount: number;
+  declare cryptoAmount: number;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public currency: string;
+  declare currency: string;
 
   @AllowNull(true)
   @Default(0)
   @Column(DataType.INTEGER)
-  public quantity: number;
+  declare quantity: number;
 
   @AllowNull(false)
   @Default(0)
   @Column(DataType.INTEGER)
-  public registered: number;
+  declare registered: number;
 
   @AllowNull(false)
   @CreatedAt
@@ -71,11 +71,11 @@ export class Ticket extends Model {
   declare updatedAt: Date;
 
   @BelongsTo(() => Event)
-  event: Event;
+  declare event: Event;
 
   @HasMany(() => Registration, {
     as: 'registrations',
     hooks: true,
   })
-  registrations: Registration[];
+  declare registrations: Registration[];
 }

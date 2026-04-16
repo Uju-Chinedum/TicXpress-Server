@@ -31,63 +31,63 @@ export class Transaction extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public fullName: string;
+  declare fullName: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public email: string;
+  declare email: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public phoneNumber: string;
+  declare phoneNumber: string;
 
   @ForeignKey(() => Event)
   @AllowNull(false)
   @Column(DataType.UUID)
-  eventId: string;
+  declare eventId: string;
 
   @ForeignKey(() => Registration)
   @AllowNull(true)
   @Column(DataType.UUID)
-  registrationId: string;
+  declare registrationId: string;
 
   @AllowNull(false)
   @Column(DataType.DECIMAL(20, 8))
-  public amount: number;
+  declare amount: number;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public currency: string;
+  declare currency: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  public transactionReference: string;
+  declare transactionReference: string;
 
   @AllowNull(false)
   @Default(TransactionStatus.PENDING)
   @Column(DataType.ENUM(...Object.values(TransactionStatus)))
-  public status: TransactionStatus;
+  declare status: TransactionStatus;
 
   @AllowNull(false)
   @Column(DataType.ENUM(...Object.values(TransactionType)))
-  public type: TransactionType;
+  declare type: TransactionType;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public gatewayReference: string;
+  declare gatewayReference: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public paymentLink: string;
+  declare paymentLink: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public gatewayStatus: string;
+  declare gatewayStatus: string;
 
   @AllowNull(true)
   @Column(DataType.BOOLEAN)
-  public registrationCompleted: boolean;
+  declare registrationCompleted: boolean;
 
   @AllowNull(false)
   @CreatedAt
@@ -100,8 +100,8 @@ export class Transaction extends Model {
   declare updatedAt: Date;
 
   @BelongsTo(() => Event)
-  event: Event;
+  declare event: Event;
 
   @BelongsTo(() => Registration)
-  registration: Registration;
+  declare registration: Registration;
 }

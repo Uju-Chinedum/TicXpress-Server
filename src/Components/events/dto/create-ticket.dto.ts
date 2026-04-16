@@ -15,7 +15,7 @@ export class CreateTicketDto {
   @IsNotEmpty({
     message: 'What is the name of the ticket tier?',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty({ required: false })
   @IsNumber()
@@ -34,5 +34,5 @@ export class CreateTicketDto {
   @IsNotEmpty({
     message: 'What is the capacity of the ticket tier?',
   })
-  quantity: string;
+  quantity!: string;
 }

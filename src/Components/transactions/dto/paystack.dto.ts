@@ -61,5 +61,5 @@ export type Data = {
 };
 
 export class PaystackCallbackDto {
-  reference: string;
+  reference!: string;
 }

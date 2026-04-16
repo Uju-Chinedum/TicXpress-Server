@@ -32,45 +32,45 @@ export class Registration extends Model {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public fullName: string;
+  declare fullName: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  public email: string;
+  declare email: string;
 
   @AllowNull(true)
   @Column(DataType.STRING)
-  public phoneNumber: string;
+  declare phoneNumber: string;
 
   @ForeignKey(() => Event)
   @AllowNull(false)
   @Column(DataType.UUID)
-  public eventId: string;
+  declare eventId: string;
 
   @ForeignKey(() => Ticket)
   @AllowNull(true)
   @Column(DataType.UUID)
-  public ticketId: string;
+  declare ticketId: string;
 
   @ForeignKey(() => Transaction)
   @AllowNull(true)
   @Column(DataType.UUID)
-  public transactionId: string;
+  declare transactionId: string;
 
   @AllowNull(false)
   @Default(RegistrationStatus.PENDING)
   @Column(DataType.ENUM(...Object.values(RegistrationStatus)))
-  public status: string;
+  declare status: string;
 
   @Unique
   @AllowNull(true)
   @Column(DataType.STRING)
-  public accessCode: string;
+  declare accessCode: string;
 
   @AllowNull(false)
   @Default(false)
   @Column(DataType.BOOLEAN)
-  public verified: boolean;
+  declare verified: boolean;
 
   @AllowNull(false)
   @CreatedAt
@@ -83,11 +83,11 @@ export class Registration extends Model {
   declare updatedAt: Date;
 
   @BelongsTo(() => Event)
-  event: Event;
+  declare event: Event;
 
   @BelongsTo(() => Transaction)
-  transaction: Transaction;
+  declare transaction: Transaction;
 
   @BelongsTo(() => Ticket)
-  ticket: Ticket;
+  declare ticket: Ticket;
 }

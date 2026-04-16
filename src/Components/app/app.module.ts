@@ -6,7 +6,7 @@ import { EventsModule } from '../events/events.module';
 import { GlobalModule } from '../global/global.module';
 import { TransactionsModule } from '../transactions/transactions.module';
 import { RegistrationsModule } from '../registrations/registrations.module';
-import { CloudinaryService } from '../../common/utils';
+import { CloudinaryProvider } from '../../common/utils';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { CloudinaryService } from '../../common/utils';
     TransactionsModule,
     RegistrationsModule,
   ],
-  providers: [CloudinaryService],
-  exports: [CloudinaryService],
+  providers: [CloudinaryProvider],
+  exports: [CloudinaryProvider],
 })
 export class AppModule {}

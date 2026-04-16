@@ -12,39 +12,39 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { v2 as cloudinary } from 'cloudinary';
+import * as multer from 'multer';
 
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { PaginationDto } from '../global/dto';
-import { cloudinaryOptions } from './types';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Controller('api/v1/events')
 export class EventsController {
-  constructor(private readonly eventsService: EventsService) {}
+  constructor(
+    private readonly eventsService: EventsService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   @Post()
   @UseInterceptors(
     FileInterceptor('image', {
-      storage: new CloudinaryStorage({
-        cloudinary,
-        params: {
-          folder: 'ticxpress',
-          allowed_formats: ['jpg', 'jpeg', 'png'],
-        },
-      } as cloudinaryOptions),
+      storage: multer.memoryStorage(),
     }),
   )
-  create(
+  async create(
     @Body('data') data: string,
     @UploadedFile() image: Express.Multer.File,
     @Req() req,
   ) {
-    const eventData: CreateEventDto = JSON.parse(data);
-    const imageUrl = image ? image.path : null;
+    const eventData: CreateEventDto = data ? JSON.parse(data) : {};
+
+    const imageUrl = image
+      ? (await this.cloudinaryService.uploadImage(image)).secure_url
+      : null;
+
     return this.eventsService.create({ ...eventData, imageUrl }, req);
   }
 

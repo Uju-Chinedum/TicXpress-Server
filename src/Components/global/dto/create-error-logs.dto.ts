@@ -1,14 +1,5 @@
-import {
-  IsString,
-  IsEmail,
-  IsDate,
-  IsBoolean,
-  IsOptional,
-  IsNotEmpty,
-  IsNumber,
-} from 'class-validator';
+import { IsEmail, IsOptional, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 
 export class CreateErrorLogsDto {
   @ApiProperty()
@@ -16,21 +7,21 @@ export class CreateErrorLogsDto {
   @IsNotEmpty({
     message: 'What is the error level?',
   })
-  level: string;
+  level!: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is the error name?',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is the error message?',
   })
-  message: string;
+  message!: string;
 
   @ApiProperty({ required: false })
   @IsEmail()

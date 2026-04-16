@@ -18,7 +18,7 @@ export class CreateEventDto {
   @IsNotEmpty({
     message: 'What is your email address?',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -30,21 +30,21 @@ export class CreateEventDto {
   @IsNotEmpty({
     message: 'Who is the organizer of the event?',
   })
-  organizer: string;
+  organizer!: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'What is the name of your event?',
   })
-  name: string;
+  name!: string;
 
   @ApiProperty()
   @IsString()
   @IsNotEmpty({
     message: 'What is your event about?',
   })
-  description: string;
+  description!: string;
 
   @ApiProperty()
   @IsString()
@@ -61,7 +61,7 @@ export class CreateEventDto {
   @IsNotEmpty({
     message: 'Where is your event?',
   })
-  location: string;
+  location!: string;
 
   @ApiProperty()
   @IsDate()
@@ -69,7 +69,7 @@ export class CreateEventDto {
   @IsNotEmpty({
     message: 'What time is your event?',
   })
-  time: Date;
+  time!: Date;
 
   @ApiProperty()
   @IsBoolean()

@@ -14,8 +14,8 @@ import {
   UniqueConstraintError,
   ValidationError,
 } from 'sequelize';
-import { GlobalService } from 'src/Components/global/global.service';
-import { ErrorData } from 'src/Components/global/types';
+import { GlobalService } from '../../Components/global/global.service';
+import { ErrorData } from '../../Components/global/types';
 import { errorResponse } from '../utils';
 
 @Catch()

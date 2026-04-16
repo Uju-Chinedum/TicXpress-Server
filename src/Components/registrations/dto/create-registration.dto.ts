@@ -15,14 +15,14 @@ export class CreateRegistrationDto {
   @IsNotEmpty({
     message: 'What is your full name?',
   })
-  fullName: string;
+  fullName!: string;
 
   @ApiProperty()
   @IsEmail()
   @IsNotEmpty({
     message: 'What is your email address?',
   })
-  email: string;
+  email!: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
@@ -34,7 +34,7 @@ export class CreateRegistrationDto {
   @IsNotEmpty({
     message: 'What is the id of the event?',
   })
-  eventId: string;
+  eventId!: string;
 
   @ApiProperty()
   @IsOptional()
